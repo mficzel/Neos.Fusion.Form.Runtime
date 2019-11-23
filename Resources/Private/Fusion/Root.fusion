@@ -10,7 +10,7 @@ prototype(Neos.Fusion.Form.Runtime:SinglePageForm) {
 
     form = null
     validator = Neos.Fusion.Form.Runtime:Validator.DataStructure
-    finisher = null
+    finisher = Neos.Fusion:Join
 
     renderer = afx`
         <Neos.Fusion.Form:Form form={form}>

@@ -33,7 +33,9 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
             lastName =  Neos.Fusion.Form.Runtime:Validator.NotEmpty
         }
 
-        finisher = afx`<h1>Thank you {form.data.firstName} {form.data.lastName}</h1>`
+        finisher {
+            thankYou = afx`<h1>Thank you {form.data.firstName} {form.data.lastName}</h1>`
+        }
     }
 }
 ``` 
