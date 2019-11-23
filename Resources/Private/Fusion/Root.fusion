@@ -1,0 +1,24 @@
+prototype(Neos.Fusion.Form.Runtime:SinglePageForm) {
+
+    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\SinglePageFormImplementation'
+
+    identifier = null
+
+    content = null
+    validator = null
+    finisher = null
+
+    renderer = afx`
+        <Neos.Fusion.Form:Form form={form}>
+            {content}
+        </Neos.Fusion.Form:Form>
+    `
+
+    @cache {
+        mode = 'uncached'
+        context {
+            1 = 'node'
+            2 = 'documentNode'
+        }
+    }
+}
