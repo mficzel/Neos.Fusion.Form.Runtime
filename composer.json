@@ -2,6 +2,9 @@
     "description": "",
     "type": "neos-package",
     "name": "neos/fusion-form-runtime",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
     "require": {
         "neos/flow": "*"
     },
