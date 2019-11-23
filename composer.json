@@ -6,7 +6,9 @@
         "GPL-3.0-or-later"
     ],
     "require": {
-        "neos/flow": "*"
+        "neos/fusion": "*",
+        "neos/fusion-form": "*",
+        "neos/fusion-afx": "*"
     },
     "autoload": {
         "psr-4": {

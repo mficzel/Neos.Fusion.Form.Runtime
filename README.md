@@ -43,4 +43,3 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
 ## Planned features
 
 - multi page forms
-- validation
