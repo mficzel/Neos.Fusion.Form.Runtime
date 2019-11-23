@@ -13,7 +13,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
     renderer = Neos.Fusion.Form.Runtime:SinglePageForm {
         identifier = "exampleForm"
 
-        content = afx`
+        form = afx`
             <fieldset>
                 <legend>name</legend>
                 <div>
@@ -27,6 +27,11 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
             </div>
         `
+
+        validator {
+            firstName =  Neos.Fusion.Form.Runtime:Validator.NotEmpty
+            lastName =  Neos.Fusion.Form.Runtime:Validator.NotEmpty
+        }
 
         finisher = afx`<h1>Thank you {form.data.firstName} {form.data.lastName}</h1>`
     }

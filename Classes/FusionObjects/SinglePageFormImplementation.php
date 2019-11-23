@@ -11,13 +11,14 @@ class SinglePageFormImplementation extends AbstractFusionObject
     {
         $form = new SinglePageForm(
             $this->getRuntime()->getControllerContext()->getRequest(),
-            $this->fusionValue('identifier')
+            $this->fusionValue('identifier'),
+            $this->fusionValue('validator')
         );
 
         $this->getRuntime()->pushContext('form', $form);
 
         if (empty($form->getData()) || $form->hasErrors()) {
-            $this->getRuntime()->pushContext('content', $this->fusionValue('content'));
+            $this->getRuntime()->pushContext('content', $this->fusionValue('form'));
             $result = $this->fusionValue('renderer');
             $this->getRuntime()->popContext();
         } else {

@@ -1,11 +1,15 @@
+prototype(Neos.Fusion.Form.Runtime:Validator.DataStructure).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\DataStructureValidatorImplementation'
+prototype(Neos.Fusion.Form.Runtime:Validator.Conjunction).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\ConjunctionValidatorImplementation'
+prototype(Neos.Fusion.Form.Runtime:Validator.NotEmpty).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\NotEmptyValidatorImplementation'
+
 prototype(Neos.Fusion.Form.Runtime:SinglePageForm) {
 
     @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\SinglePageFormImplementation'
 
     identifier = null
 
-    content = null
-    validator = null
+    form = null
+    validator = Neos.Fusion.Form.Runtime:Validator.DataStructure
     finisher = null
 
     renderer = afx`
@@ -22,3 +26,5 @@ prototype(Neos.Fusion.Form.Runtime:SinglePageForm) {
         }
     }
 }
+
+
