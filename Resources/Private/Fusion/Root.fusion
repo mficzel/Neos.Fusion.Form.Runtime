@@ -2,29 +2,39 @@ prototype(Neos.Fusion.Form.Runtime:Validator.DataStructure).@class = 'Neos\\Fusi
 prototype(Neos.Fusion.Form.Runtime:Validator.Conjunction).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\ConjunctionValidatorImplementation'
 prototype(Neos.Fusion.Form.Runtime:Validator.NotEmpty).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\NotEmptyValidatorImplementation'
 
-prototype(Neos.Fusion.Form.Runtime:SinglePageForm) {
+prototype(Neos.Fusion.Form.Runtime:Form.StepCollection).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepCollectionImplementation'
+prototype(Neos.Fusion.Form.Runtime:Form.Step) {
+    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepImplementation'
+    validator = Neos.Fusion.Form.Runtime:Validator.DataStructure
+    content = ''
+}
 
-    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\SinglePageFormImplementation'
+prototype(Neos.Fusion.Form.Runtime:MultiStepForm) {
+    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\MultiStepFormImplementation'
 
     identifier = null
-
-    form = null
-    validator = Neos.Fusion.Form.Runtime:Validator.DataStructure
-    finisher = Neos.Fusion:Join
+    steps = Neos.Fusion.Form.Runtime:Form.StepCollection
 
     renderer = afx`
-        <Neos.Fusion.Form:Form form={form}>
-            {content}
+        <Neos.Fusion.Form:Form
+           form={form}
+        >
+            <Neos.Fusion.Form:Hidden field.name="__step" attributes.value={__step} />
+            <Neos.Fusion.Form:Hidden field.name="__data" attributes.value={__data} />
+            {__content}
         </Neos.Fusion.Form:Form>
     `
 
+    #
+    # @todo this should become a dynamic segment to allow caching of the first page
+    #
     @cache {
         mode = 'uncached'
         context {
             1 = 'node'
             2 = 'documentNode'
+            3 = 'site'
         }
     }
 }
-
 
