@@ -1,6 +1,8 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\FusionObjects\Form;
 
+use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
+use Neos\Fusion\Form\Runtime\Domain\StepInterface;
 use Neos\Fusion\FusionObjects\DataStructureImplementation;
 use Neos\Fusion\Core\Parser;
 
@@ -25,7 +27,7 @@ class StepCollectionImplementation extends DataStructureImplementation implement
      * @param string $identifier
      * @return StepImplementation
      */
-    public function getStepByIdentifier(string $identifier): StepImplementation
+    public function getStepByIdentifier(string $identifier): StepInterface
     {
         if (array_key_exists($identifier, $this->steps)) {
             return $this->steps[$identifier];
@@ -49,7 +51,7 @@ class StepCollectionImplementation extends DataStructureImplementation implement
     {
         $keys = array_keys($this->steps);
         $pos = array_search($previousStepName, $keys);
-        if ($pos !== false && count($keys) >= $pos) {
+        if ($pos !== false && array_key_exists($pos + 1, $keys)) {
             return $keys[$pos+1];
         }
         return null;

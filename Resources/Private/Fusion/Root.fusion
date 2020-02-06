@@ -1,12 +1,17 @@
 prototype(Neos.Fusion.Form.Runtime:Validator.DataStructure).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\DataStructureValidatorImplementation'
-prototype(Neos.Fusion.Form.Runtime:Validator.Conjunction).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\ConjunctionValidatorImplementation'
 prototype(Neos.Fusion.Form.Runtime:Validator.NotEmpty).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Validator\\NotEmptyValidatorImplementation'
+
+prototype(Neos.Fusion.Form.Runtime:Action.List).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Action\\ActionListImplementation'
+prototype(Neos.Fusion.Form.Runtime:Action.Redirect).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Action\\RedirectActionImplementation'
+prototype(Neos.Fusion.Form.Runtime:Action.Email).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Action\\EmailActionImplementation'
+prototype(Neos.Fusion.Form.Runtime:Action.Message).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Action\\MessageActionImplementation'
 
 prototype(Neos.Fusion.Form.Runtime:Form.StepCollection).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepCollectionImplementation'
 prototype(Neos.Fusion.Form.Runtime:Form.Step) {
     @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepImplementation'
-    validator = Neos.Fusion.Form.Runtime:Validator.DataStructure
+
     content = ''
+    validator = Neos.Fusion.Form.Runtime:Validator.DataStructure
 }
 
 prototype(Neos.Fusion.Form.Runtime:MultiStepForm) {
@@ -14,6 +19,7 @@ prototype(Neos.Fusion.Form.Runtime:MultiStepForm) {
 
     identifier = null
     steps = Neos.Fusion.Form.Runtime:Form.StepCollection
+    action = Neos.Fusion.Form.Runtime:Action.List
 
     renderer = afx`
         <Neos.Fusion.Form:Form

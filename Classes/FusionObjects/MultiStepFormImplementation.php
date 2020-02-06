@@ -1,11 +1,14 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\FusionObjects;
 
+use GuzzleHttp\Psr7\Uri;
+use Neos\Error\Messages\Result;
 use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\Form\Domain\Form;
 
-use Neos\Fusion\Form\Runtime\FusionObjects\Form\StepCollectionInterface;
-use Neos\Fusion\Form\Runtime\FusionObjects\Form\StepInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
+use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
+use Neos\Fusion\Form\Runtime\Domain\StepInterface;
 
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
 use Neos\Flow\Security\Cryptography\HashService;
@@ -42,6 +45,14 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     protected function getStepCollection(): StepCollectionInterface
     {
         return $this->fusionValue('steps');
+    }
+
+    /**
+     * @return ActionInterface|null
+     */
+    protected function getAction(): ?ActionInterface
+    {
+        return  $this->fusionValue('action');
     }
 
     public function evaluate()
@@ -96,7 +107,11 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                 }
 
                 // validata $dataWithSubmittedValues
-                $result = $step->validate($submittedData);
+                if ($validator = $step->getValidator()) {
+                    $result = $validator->validate($submittedData);
+                } else {
+                    $result = new Result();
+                }
 
                 // use next step from now
                 if ($result->hasErrors()) {
@@ -106,6 +121,14 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                 } else {
                     $data = Arrays::arrayMergeRecursiveOverrule($data, $submittedData);
                     $stepIdentifier = $stepCollection->getNextStepIdentifier($stepIdentifier);
+
+                    if (is_null($stepIdentifier) && $action = $this->getAction()) {
+                        $this->getRuntime()->pushContext('data', $data);
+                        $message = $action->execute($data);
+                        $this->getRuntime()->popContext();
+                        return $message;
+                    }
+
                     $step = $stepCollection->getStepByIdentifier($stepIdentifier);
                 }
             }
@@ -122,14 +145,16 @@ class MultiStepFormImplementation  extends AbstractFusionObject
             'post'
         );
 
-        //push data to context
+        // push data to context before the content is evaluated
         $this->getRuntime()->pushContextArray([
             'form' => $form,
             '__step' => $stepIdentifier,
-            '__data' => $this->hashService->appendHmac(serialize($data))
+            '__data' => $this->hashService->appendHmac(serialize($data)),
+            'data' => $data
         ]);
 
-        $this->getRuntime()->pushContext('__content', $step->render());
+        // evaluate content
+        $this->getRuntime()->pushContext('__content', $step->renderContent());
         $result = $this->fusionValue('renderer');
         $this->getRuntime()->popContext();
         $this->getRuntime()->popContext();
