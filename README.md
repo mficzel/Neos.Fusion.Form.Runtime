@@ -4,6 +4,25 @@ Pure fusion form runtime with afx support!
 
 ## !!! This is experimental and may turn out to be a totally stupid idea!!!
 
+## Pain points i try to adress with this
+
+- ist was hard to get access to node-data in finishers
+  - email address
+  - redirect targets ...
+- it was hard to configure parts of the form from node-data 
+  - disable steps
+  - disable forms
+- it was tedious to render custom markup for
+  - grids
+  - fieldTypes
+  - content between fields
+- forms was very hard to extend
+  - You had to deal with settings.yaml, form.yaml and Fluid  
+
+## Poasible new pain points
+
+- validation is defined seperately from rendering
+
 ## Define a form with validation and finishing actions entirely in fusion:
 
 ```
@@ -36,8 +55,8 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 `
 
                 validators {
-                    firstName.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
-                    lastName.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
+                    firstName.notEmpty.identifier = 'Neos.Flow:NotEmpty'
+                    lastName.notEmpty.identifier = 'Neos.Flow:NotEmpty'
                 }
             }
 
@@ -58,12 +77,12 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 `
 
                 validators {
-                    street.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
-                    city.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
+                    street.notEmpty.identifier = 'Neos.Flow:NotEmpty'
+                    city.notEmpty.identifier = 'Neos.Flow:NotEmpty'
                 }
             }
 
-            last {
+            confirmation {
                 renderer = afx`
                     <h1>Confirm to submit {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>
                     <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
@@ -72,15 +91,30 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
         }
 
         actions {
-            message.class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\MessageActionHandler'
-            message.options.content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
-
-            redirect.class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\RedirectActionHandler'
-            redirect.options {
-                uri = Neos.Neos:NodeUri {
-                    node = ${site}
+        
+            message {
+                identifier = 'Neos.Fusion.Form.Runtime:Message'
+                options.content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
+            }
+                
+            email {
+                identifier = 'Neos.Fusion.Form.Runtime:Email'
+                options {
+                    from = 'testmail@testmail.de'
+                    to = 'ficzel@sitegeist.de'
+                    subject = 'form was submitted'
+                    text = afx`Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}`
                 }
             }
+
+            redirect {
+                identifier = 'Neos.Fusion.Form.Runtime:Redirect'
+                options {
+                    uri = Neos.Neos:NodeUri {
+                        node = ${site}
+                    }
+                }
+            }        
         }
     }
 }

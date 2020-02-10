@@ -4,7 +4,7 @@ namespace Neos\Fusion\Form\Runtime\FusionObjects;
 use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\Form\Domain\Form;
 use Neos\Flow\Validation\ValidatorResolver;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandler\ActionHandlerResolver;
+use Neos\Fusion\Form\Runtime\ActionHandler\ActionHandlerResolver;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
 use Neos\Flow\Security\Cryptography\HashService;
@@ -123,7 +123,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                         $pathValue = ObjectAccess::getPropertyPath($submittedData, $path);
                         foreach($pathValidationConfigurations as $pathValidationConfiguration) {
                             $pathValidator = $this->validatorResolver->createValidator(
-                                $pathValidationConfiguration['class'],
+                                $pathValidationConfiguration['identifier'],
                                 $pathValidationConfiguration['options'] ?? []
                             );
                             $result->forProperty($path)->merge($pathValidator->validate($pathValue));
@@ -145,7 +145,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                         $this->getRuntime()->pushContext('data', $data);
                         $actionConfigurations = $this->getActionConfigurations();
                         foreach ($actionConfigurations as $actionConfiguration) {
-                            $action = $this->actionHandlerResolver->createActionHandler( $actionConfiguration['class']);
+                            $action = $this->actionHandlerResolver->createActionHandler( $actionConfiguration['identifier']);
                             $messages[] = $action->handle($this->getRuntime()->getControllerContext(), $actionConfiguration['options'] ?? []);
                         }
                         $this->getRuntime()->popContext();
