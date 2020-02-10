@@ -6,5 +6,5 @@ use Neos\Flow\Validation\Validator\ValidatorInterface;
 interface StepInterface
 {
     public function render():string;
-    public function getValidationConfiguration(): array;
+    public function getValidationConfigurations(): array;
 }

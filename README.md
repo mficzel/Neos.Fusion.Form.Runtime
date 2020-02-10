@@ -87,9 +87,21 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
             }
         }
 
-        action {
-            message = Neos.Fusion.Form.Runtime:Action.Message {
-                content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
+        actions = Neos.Fusion:DataStructure {
+            message {
+                class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\MessageActionHandler'
+                options {
+                    content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
+                }
+            }
+
+            redirect {
+                class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\RedirectActionHandler'
+                options {
+                    uri = Neos.Neos:NodeUri {
+                        node = ${site}
+                    }
+                }
             }
         }
     }

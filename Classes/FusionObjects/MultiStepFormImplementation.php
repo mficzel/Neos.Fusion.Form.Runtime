@@ -1,21 +1,16 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\FusionObjects;
 
-use GuzzleHttp\Psr7\Uri;
-use Neos\Error\Messages\Result;
 use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\Form\Domain\Form;
-
 use Neos\Flow\Validation\ValidatorResolver;
-
-use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionHandler\ActionHandlerResolver;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
-use Neos\Fusion\Form\Runtime\Domain\StepInterface;
-
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
 use Neos\Flow\Security\Cryptography\HashService;
 use Neos\Utility\Arrays;
 use Neos\Utility\ObjectAccess;
+use Neos\Error\Messages\Result;
 
 class MultiStepFormImplementation  extends AbstractFusionObject
 {
@@ -31,6 +26,12 @@ class MultiStepFormImplementation  extends AbstractFusionObject
      * @Flow\Inject
      */
     protected $validatorResolver;
+
+    /**
+     * @var ActionHandlerResolver
+     * @Flow\Inject
+     */
+    protected $actionHandlerResolver;
 
     /**
      * @return string
@@ -57,11 +58,11 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     }
 
     /**
-     * @return ActionInterface|null
+     * @return array
      */
-    protected function getAction(): ?ActionInterface
+    protected function getActionConfigurations(): array
     {
-        return  $this->fusionValue('action');
+        return  $this->fusionValue('actions');
     }
 
     public function evaluate()
@@ -115,19 +116,22 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                     }
                 }
 
-                // validata $submittedData
+                // validate $submittedData
                 $result = new Result();
-                if ($validationConfigurations = $step->getValidationConfiguration()) {
+                if ($validationConfigurations = $step->getValidationConfigurations()) {
                     foreach ($validationConfigurations as $path => $pathValidationConfigurations) {
                         $pathValue = ObjectAccess::getPropertyPath($submittedData, $path);
                         foreach($pathValidationConfigurations as $pathValidationConfiguration) {
-                            $pathValidator = $this->validatorResolver->createValidator($pathValidationConfiguration['class'], $pathValidationConfiguration['options'] ?? []);
+                            $pathValidator = $this->validatorResolver->createValidator(
+                                $pathValidationConfiguration['class'],
+                                $pathValidationConfiguration['options'] ?? []
+                            );
                             $result->forProperty($path)->merge($pathValidator->validate($pathValue));
                         }
                     }
                 }
 
-                // rerender current step on error
+                // rerender last step on error
                 if ($result->hasErrors()) {
                     $request = clone $request;
                     $request->setArgument('__submittedArguments', $submittedData);
@@ -136,11 +140,16 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                     $data = Arrays::arrayMergeRecursiveOverrule($data, $submittedData);
                     $stepIdentifier = $stepCollection->getNextStepIdentifier($stepIdentifier);
 
-                    if (is_null($stepIdentifier) && $action = $this->getAction()) {
+                    if (is_null($stepIdentifier)) {
+                        $messages = [];
                         $this->getRuntime()->pushContext('data', $data);
-                        $message = $action->execute($data);
+                        $actionConfigurations = $this->getActionConfigurations();
+                        foreach ($actionConfigurations as $actionConfiguration) {
+                            $action = $this->actionHandlerResolver->createActionHandler( $actionConfiguration['class']);
+                            $messages[] = $action->handle($this->getRuntime()->getControllerContext(), $actionConfiguration['options'] ?? []);
+                        }
                         $this->getRuntime()->popContext();
-                        return $message;
+                        return implode('', array_filter($messages));
                     }
 
                     $step = $stepCollection->getStepByIdentifier($stepIdentifier);
