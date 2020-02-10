@@ -35,17 +35,9 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                     </div>
                 `
 
-                validators = Neos.Fusion:DataStructure {
-                    firstName {
-                        1 {
-                            class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
-                        }
-                    }
-                    lastName {
-                        1 {
-                            class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
-                        }
-                    }
+                validators {
+                    firstName.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
+                    lastName.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
                 }
             }
 
@@ -65,17 +57,9 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                     </div>
                 `
 
-                validators = Neos.Fusion:DataStructure {
-                    street {
-                        1 {
-                            class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
-                        }
-                    }
-                    city {
-                        1 {
-                            class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
-                        }
-                    }
+                validators {
+                    street.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
+                    city.notEmpty.class = '\\Neos\\Flow\\Validation\\Validator\\NotEmptyValidator'
                 }
             }
 
@@ -87,20 +71,14 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
             }
         }
 
-        actions = Neos.Fusion:DataStructure {
-            message {
-                class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\MessageActionHandler'
-                options {
-                    content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
-                }
-            }
+        actions {
+            message.class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\MessageActionHandler'
+            message.options.content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
 
-            redirect {
-                class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\RedirectActionHandler'
-                options {
-                    uri = Neos.Neos:NodeUri {
-                        node = ${site}
-                    }
+            redirect.class = 'Neos\\Fusion\\Form\\Runtime\\Domain\\ActionHandler\\RedirectActionHandler'
+            redirect.options {
+                uri = Neos.Neos:NodeUri {
+                    node = ${site}
                 }
             }
         }
