@@ -13,13 +13,13 @@ class StepImplementation extends AbstractFusionObject implements StepInterface
         return $this;
     }
 
-    public function renderContent(): string
+    public function render(): string
     {
-        return $this->fusionValue('content');
+        return $this->fusionValue('renderer');
     }
 
-    public function getValidator(): ?ValidatorInterface
+    public function getValidationConfiguration(): array
     {
-        return $this->fusionValue('validator');
+        return $this->fusionValue('validators');
     }
 }

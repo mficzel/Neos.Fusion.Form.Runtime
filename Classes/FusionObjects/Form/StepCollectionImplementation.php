@@ -71,7 +71,7 @@ class StepCollectionImplementation extends DataStructureImplementation implement
         foreach ($sortedChildFusionKeys as $key) {
             $propertyPath = $key;
             if ($this->isUntypedProperty($this->properties[$key])) {
-                $propertyPath .= '<Neos.Fusion.Form.Runtime:Form.Step>';
+                $propertyPath .= '<Neos.Fusion.Form:MultiStepForm.Step>';
             }
             try {
                 $value = $this->fusionValue($propertyPath);

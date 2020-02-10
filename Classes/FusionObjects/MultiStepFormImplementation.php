@@ -6,6 +6,8 @@ use Neos\Error\Messages\Result;
 use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\Form\Domain\Form;
 
+use Neos\Flow\Validation\ValidatorResolver;
+
 use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
 use Neos\Fusion\Form\Runtime\Domain\StepInterface;
@@ -13,6 +15,7 @@ use Neos\Fusion\Form\Runtime\Domain\StepInterface;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
 use Neos\Flow\Security\Cryptography\HashService;
 use Neos\Utility\Arrays;
+use Neos\Utility\ObjectAccess;
 
 class MultiStepFormImplementation  extends AbstractFusionObject
 {
@@ -22,6 +25,12 @@ class MultiStepFormImplementation  extends AbstractFusionObject
      * @Flow\Inject
      */
     protected $hashService;
+
+    /**
+     * @var ValidatorResolver
+     * @Flow\Inject
+     */
+    protected $validatorResolver;
 
     /**
      * @return string
@@ -93,7 +102,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                     }
                 }
 
-                // fetch new submitted properties
+                // fetch newly submitted properties but only those that were trusted
                 // @todo make this algorithm recursive or call the property mapper
                 $submittedData = [];
                 foreach ($trustedProperties as $trustedPropertyName => $trustedPropertyValue) {
@@ -106,14 +115,19 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                     }
                 }
 
-                // validata $dataWithSubmittedValues
-                if ($validator = $step->getValidator()) {
-                    $result = $validator->validate($submittedData);
-                } else {
-                    $result = new Result();
+                // validata $submittedData
+                $result = new Result();
+                if ($validationConfigurations = $step->getValidationConfiguration()) {
+                    foreach ($validationConfigurations as $path => $pathValidationConfigurations) {
+                        $pathValue = ObjectAccess::getPropertyPath($submittedData, $path);
+                        foreach($pathValidationConfigurations as $pathValidationConfiguration) {
+                            $pathValidator = $this->validatorResolver->createValidator($pathValidationConfiguration['class'], $pathValidationConfiguration['options'] ?? []);
+                            $result->forProperty($path)->merge($pathValidator->validate($pathValue));
+                        }
+                    }
                 }
 
-                // use next step from now
+                // rerender current step on error
                 if ($result->hasErrors()) {
                     $request = clone $request;
                     $request->setArgument('__submittedArguments', $submittedData);
@@ -154,7 +168,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         ]);
 
         // evaluate content
-        $this->getRuntime()->pushContext('__content', $step->renderContent());
+        $this->getRuntime()->pushContext('__content', $step->render());
         $result = $this->fusionValue('renderer');
         $this->getRuntime()->popContext();
         $this->getRuntime()->popContext();

@@ -6,19 +6,19 @@ prototype(Neos.Fusion.Form.Runtime:Action.Redirect).@class = 'Neos\\Fusion\\Form
 prototype(Neos.Fusion.Form.Runtime:Action.Email).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Action\\EmailActionImplementation'
 prototype(Neos.Fusion.Form.Runtime:Action.Message).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Action\\MessageActionImplementation'
 
-prototype(Neos.Fusion.Form.Runtime:Form.StepCollection).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepCollectionImplementation'
-prototype(Neos.Fusion.Form.Runtime:Form.Step) {
+prototype(Neos.Fusion.Form:MultiStepForm.StepCollection).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepCollectionImplementation'
+prototype(Neos.Fusion.Form:MultiStepForm.Step) {
     @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepImplementation'
-
-    content = ''
-    validator = Neos.Fusion.Form.Runtime:Validator.DataStructure
+    renderer = ''
+    validators = Neos.Fusion:DataStructure
 }
 
-prototype(Neos.Fusion.Form.Runtime:MultiStepForm) {
+prototype(Neos.Fusion.Form:MultiStepForm) {
     @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\MultiStepFormImplementation'
 
     identifier = null
-    steps = Neos.Fusion.Form.Runtime:Form.StepCollection
+    data = Neos.Fusion:DataStructure
+    steps = Neos.Fusion.Form:MultiStepForm.StepCollection
     action = Neos.Fusion.Form.Runtime:Action.List
 
     renderer = afx`
