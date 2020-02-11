@@ -72,6 +72,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                         </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
                     </fieldset>
                     <div>
+                        <Neos.Fusion.Form:Button field.name="__step" field.value="first">Back</Neos.Fusion.Form:Button>
                         <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
                     </div>
                 `
@@ -85,7 +86,10 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
             confirmation {
                 renderer = afx`
                     <h1>Confirm to submit {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>
-                    <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
+                    <div>
+                        <Neos.Fusion.Form:Button field.name="__step" field.value="second">Back</Neos.Fusion.Form:Button>
+                        <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
+                    </div>
                 `
             }
         }
