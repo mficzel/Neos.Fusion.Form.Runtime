@@ -1,6 +1,7 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\FusionObjects\Form;
 
+use Neos\Fusion\Form\Runtime\Domain\InvalidStepIdentifierException;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
 use Neos\Fusion\Form\Runtime\Domain\StepInterface;
 use Neos\Fusion\FusionObjects\DataStructureImplementation;
@@ -12,19 +13,6 @@ class StepCollectionImplementation extends DataStructureImplementation implement
 
     /**
      * @param string $identifier
-     * @return bool
-     */
-    public function hasStepIdentifier(string $identifier): bool
-    {
-        if (array_key_exists($identifier, $this->steps)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * @param string $identifier
      * @return StepImplementation
      */
     public function getStepByIdentifier(string $identifier): StepInterface
@@ -32,7 +20,7 @@ class StepCollectionImplementation extends DataStructureImplementation implement
         if (array_key_exists($identifier, $this->steps)) {
             return $this->steps[$identifier];
         } else {
-            return null;
+            throw new InvalidStepIdentifierException();
         }
     }
 

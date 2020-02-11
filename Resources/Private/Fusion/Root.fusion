@@ -17,9 +17,8 @@ prototype(Neos.Fusion.Form:MultiStepForm) {
         <Neos.Fusion.Form:Form
            form={form}
         >
-            <Neos.Fusion.Form:Hidden field.name="__step" attributes.value={__step} />
-            <Neos.Fusion.Form:Hidden field.name="__data" attributes.value={__data} />
-            {__content}
+            <Neos.Fusion.Form:Hidden field.name="__state" />
+            {content}
         </Neos.Fusion.Form:Form>
     `
 
