@@ -86,8 +86,20 @@ class MultiStepFormImplementation  extends AbstractFusionObject
 
         // restore previous form state
         list($stepIdentifier, $data) = $this->restoreSerializedFormState($submittedValues['__state']);
-        $step = $stepCollection->getStepByIdentifier($stepIdentifier);
 
+        // when a step is addressed directly no submitted values are handled
+        if (array_key_exists('__step' , $submittedValues)) {
+            $stepIdentifier = $submittedValues['__step'];
+            return $this->renderFormStep(
+                $formIdentifier,
+                $data,
+                $stepIdentifier,
+                new Result(),
+                []
+            );
+        }
+
+        $step = $stepCollection->getStepByIdentifier($stepIdentifier);
         // fetch only submitted properties but only those that were trusted
         // @todo make this algorithm recursive or even call the property mapper
         $trustedProperties = unserialize($this->hashService->validateAndStripHmac($submittedValues['__trustedProperties'] ?? ''));
@@ -185,7 +197,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     {
         $step = $this->getStepCollection()->getStepByIdentifier($stepIdentifier);
 
-        // add current state to the form data
+        // add serialized state to the form data
         $serializedState = $this->serializeFormState($stepIdentifier, $data);
         $data['__state'] = $serializedState;
         $submittedData['__state'] = $serializedState;
@@ -217,7 +229,6 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         return $result;
     }
 
-
     /**
      * @param array $data
      * @return string
@@ -235,7 +246,4 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         $this->getRuntime()->popContext();
         return implode('', array_filter($messages));
     }
-
-
-
 }
