@@ -81,7 +81,11 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         $stepCollection = $this->getStepCollection();
 
         // handle submitted values
+
         $data = $this->getData();
+        $submittedData = [];
+        $validationResult = new Result();
+
         $stepIdentifier = $submittedValues['__step'] ?? null;
         if ($stepIdentifier) {
 
@@ -105,7 +109,6 @@ class MultiStepFormImplementation  extends AbstractFusionObject
 
                 // fetch newly submitted properties but only those that were trusted
                 // @todo make this algorithm recursive or call the property mapper
-                $submittedData = [];
                 foreach ($trustedProperties as $trustedPropertyName => $trustedPropertyValue) {
                     if (in_array($trustedPropertyName, ['__data', '__step'])) {
                         continue;
@@ -117,7 +120,6 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                 }
 
                 // validate $submittedData
-                $result = new Result();
                 if ($validationConfigurations = $step->getValidationConfigurations()) {
                     foreach ($validationConfigurations as $path => $pathValidationConfigurations) {
                         $pathValue = ObjectAccess::getPropertyPath($submittedData, $path);
@@ -126,39 +128,43 @@ class MultiStepFormImplementation  extends AbstractFusionObject
                                 $pathValidationConfiguration['identifier'],
                                 $pathValidationConfiguration['options'] ?? []
                             );
-                            $result->forProperty($path)->merge($pathValidator->validate($pathValue));
+                            $validationResult->forProperty($path)->merge($pathValidator->validate($pathValue));
                         }
                     }
                 }
 
-                // rerender last step on error
-                if ($result->hasErrors()) {
-                    $request = clone $request;
-                    $request->setArgument('__submittedArguments', $submittedData);
-                    $request->setArgument('__submittedArgumentValidationResults', $result);
-                } else {
+                // render next step or call actions
+                if ($validationResult->hasErrors() === false ) {
                     $data = Arrays::arrayMergeRecursiveOverrule($data, $submittedData);
                     $stepIdentifier = $stepCollection->getNextStepIdentifier($stepIdentifier);
-
                     if (is_null($stepIdentifier)) {
-                        $messages = [];
-                        $this->getRuntime()->pushContext('data', $data);
-                        $actionConfigurations = $this->getActionConfigurations();
-                        foreach ($actionConfigurations as $actionConfiguration) {
-                            $action = $this->actionHandlerResolver->createActionHandler( $actionConfiguration['identifier']);
-                            $messages[] = $action->handle($this->getRuntime()->getControllerContext(), $actionConfiguration['options'] ?? []);
-                        }
-                        $this->getRuntime()->popContext();
-                        return implode('', array_filter($messages));
+                        return  $this->invokeActionHandlers($data);
                     }
-
-                    $step = $stepCollection->getStepByIdentifier($stepIdentifier);
                 }
             }
         } else {
             $stepIdentifier = $stepCollection->getFirstStepIdentifier();
-            $step = $stepCollection->getStepByIdentifier($stepIdentifier);
         }
+
+        return $this->renderFormStep($identifier, $data, $stepIdentifier, $validationResult, $submittedData);
+    }
+
+    /**
+     * @param string $identifier
+     * @param array $data
+     * @param string $stepIdentifier
+     * @param Result $validationResult
+     * @param array $submittedData
+     * @return string
+     */
+    protected function renderFormStep(string $identifier, array $data, string $stepIdentifier, Result $validationResult, array $submittedData): string
+    {
+        $step = $this->getStepCollection()->getStepByIdentifier($stepIdentifier);
+
+        // use a fake request until we can pass the validation result and submitted values directly to the form
+        $request = clone $this->getRuntime()->getControllerContext()->getRequest();
+        $request->setArgument('__submittedArguments', $submittedData);
+        $request->setArgument('__submittedArgumentValidationResults', $validationResult);
 
         $form = new Form (
             $request,
@@ -181,7 +187,27 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         $result = $this->fusionValue('renderer');
         $this->getRuntime()->popContext();
         $this->getRuntime()->popContext();
-
         return $result;
     }
+
+
+    /**
+     * @param array $data
+     * @return string
+     * @throws \Neos\Fusion\Form\Runtime\ActionHandler\NoSuchActionHandlerException
+     */
+    protected function invokeActionHandlers(array $data): string
+    {
+        $messages = [];
+        $this->getRuntime()->pushContext('data', $data);
+        $actionConfigurations = $this->getActionConfigurations();
+        foreach ($actionConfigurations as $actionConfiguration) {
+            $action = $this->actionHandlerResolver->createActionHandler($actionConfiguration['identifier']);
+            $messages[] = $action->handle($this->getRuntime()->getControllerContext(), $actionConfiguration['options'] ?? []);
+        }
+        $this->getRuntime()->popContext();
+        return implode('', array_filter($messages));
+    }
+
+
 }
