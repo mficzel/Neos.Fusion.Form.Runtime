@@ -3,6 +3,7 @@ namespace Neos\Fusion\Form\Runtime\ActionHandler;
 
 use Neos\Flow\Http\Component\SetHeaderComponent;
 use Neos\Flow\Mvc\Controller\ControllerContext;
+use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
 
 class RedirectActionHandler implements ActionHandlerInterface
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\ActionHandler;
+namespace Neos\Fusion\Form\Runtime\Domain;
 
 use Neos\Flow\Mvc\Controller\ControllerContext;
 

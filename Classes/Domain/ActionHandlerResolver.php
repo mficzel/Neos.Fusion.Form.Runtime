@@ -1,10 +1,8 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\ActionHandler;
+namespace Neos\Fusion\Form\Runtime\Domain;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
-use Neos\Flow\Reflection\ReflectionService;
-use Neos\Flow\Validation\Validator\ValidatorInterface;
 
 class ActionHandlerResolver
 {

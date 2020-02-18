@@ -88,18 +88,17 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
         }
 
         actions {
-        
             message {
                 identifier = 'Neos.Fusion.Form.Runtime:Message'
                 options.content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
             }
-                
+
             email {
                 identifier = 'Neos.Fusion.Form.Runtime:Email'
                 options {
-                    from = 'testmail@testmail.de'
-                    to = 'ficzel@sitegeist.de'
-                    subject = 'form was submitted'
+                    from = ${q(node).property('mailFrom')}
+                    to = ${q(node).property('mailTo')}
+                    subject = ${q(node).property('mailSubject')}
                     text = afx`Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}`
                 }
             }
@@ -108,10 +107,10 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 identifier = 'Neos.Fusion.Form.Runtime:Redirect'
                 options {
                     uri = Neos.Neos:NodeUri {
-                        node = ${site}
+                        node = ${q(node).property('thankyou')}
                     }
                 }
-            }        
+            }
         }
     }
 }

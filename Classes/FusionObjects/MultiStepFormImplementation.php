@@ -4,7 +4,7 @@ namespace Neos\Fusion\Form\Runtime\FusionObjects;
 use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\Form\Domain\Form;
 use Neos\Flow\Validation\ValidatorResolver;
-use Neos\Fusion\Form\Runtime\ActionHandler\ActionHandlerResolver;
+use Neos\Fusion\Form\Runtime\Domain\ActionHandlerResolver;
 use Neos\Fusion\Form\Runtime\Domain\FormState;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
@@ -230,7 +230,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     /**
      * @param FormState $formState
      * @return string
-     * @throws \Neos\Fusion\Form\Runtime\ActionHandler\NoSuchActionHandlerException
+     * @throws \Neos\Fusion\Form\Runtime\Domain\NoSuchActionHandlerException
      */
     protected function invokeActionHandlers(FormState $formState): string
     {
