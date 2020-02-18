@@ -2,6 +2,7 @@
 namespace Neos\Fusion\Form\Runtime\Domain;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 
 class ActionHandlerResolver
@@ -15,10 +16,11 @@ class ActionHandlerResolver
 
     /**
      * @param string $handlerType
-     * @param array $handlerOptions
-     * @return ActionInterface
+     * @param ControllerContext $controllerContext
+     * @return ActionHandlerInterface
+     * @throws NoSuchActionHandlerException
      */
-    public function createActionHandler(string $handlerType): ActionHandlerInterface
+    public function createActionHandler(string $handlerType, ControllerContext $controllerContext): ActionHandlerInterface
     {
         if ($objectName = $this->resolveActionHandlerObjectName($handlerType)) {
             $actionHandler = new $objectName();
@@ -29,6 +31,8 @@ class ActionHandlerResolver
         if (!($actionHandler instanceof ActionHandlerInterface)) {
             throw new NoSuchActionHandlerException(sprintf('The action handler "%s" does not implement %s!', $handlerType, ActionHandlerInterface::class), 1581362552);
         }
+
+        $actionHandler->setControllerContext($controllerContext);
 
         return $actionHandler;
     }

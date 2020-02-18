@@ -239,8 +239,8 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         $this->getRuntime()->pushContext('data', $data);
         $actionConfigurations = $this->getActionConfigurations();
         foreach ($actionConfigurations as $actionConfiguration) {
-            $action = $this->actionHandlerResolver->createActionHandler($actionConfiguration['identifier']);
-            $messages[] = $action->handle($this->getRuntime()->getControllerContext(), $actionConfiguration['options'] ?? []);
+            $action = $this->actionHandlerResolver->createActionHandler($actionConfiguration['identifier'], $this->runtime->getControllerContext());
+            $messages[] = $action->handle($actionConfiguration['options'] ?? []);
         }
         $this->getRuntime()->popContext();
         return implode('', array_filter($messages));

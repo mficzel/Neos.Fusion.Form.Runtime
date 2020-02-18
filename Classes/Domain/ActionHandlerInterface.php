@@ -5,5 +5,14 @@ use Neos\Flow\Mvc\Controller\ControllerContext;
 
 interface ActionHandlerInterface
 {
-    public function handle(ControllerContext $controllerContext, array $options = []): ?string;
+    /**
+     * @param array $options
+     * @return string|null
+     */
+    public function handle(array $options = []): ?string;
+
+    /**
+     * @param ControllerContext $controllerContext
+     */
+    public function setControllerContext(ControllerContext $controllerContext): void;
 }

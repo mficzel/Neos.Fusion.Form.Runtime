@@ -1,12 +1,12 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\ActionHandler;
 
-use Neos\Flow\Mvc\Controller\ControllerContext;
+use Neos\Fusion\Form\Runtime\Domain\AbstractActionHandler;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
 
-class MessageActionHandler implements ActionHandlerInterface
+class MessageActionHandler extends AbstractActionHandler implements ActionHandlerInterface
 {
-    public function handle(ControllerContext $controllerContext, array $options = []): ?string
+    public function handle(array $options = []): ?string
     {
         return $options['content'];
     }
