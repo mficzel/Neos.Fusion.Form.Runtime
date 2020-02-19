@@ -7,4 +7,5 @@ interface StepInterface
 {
     public function render():string;
     public function getValidationConfigurations(): array;
+    public function getTypeConfigurations(): array;
 }

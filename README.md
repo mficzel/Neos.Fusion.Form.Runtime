@@ -75,6 +75,26 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                     city.notEmpty.identifier = 'Neos.Flow:NotEmpty'
                 }
             }
+            
+            third {
+                renderer = afx`
+                    <fieldset>
+                        <legend>file</legend>
+                        <Neos.Fusion.Form:Neos.BackendModule.FieldContainer field.name="file" label="Street">
+                            <Neos.Fusion.Form:Upload />
+                        </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
+                    </fieldset>
+                    <div>
+                        <Neos.Fusion.Form:Button field.name="__step" field.value="second">Back</Neos.Fusion.Form:Button>
+                        <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
+                    </div>
+                `
+
+                types {
+                    # this does not work yet
+                    file = 'Neos\\Flow\\ResourceManagement\\PersistentResource'
+                }
+            }
 
             confirmation {
                 renderer = afx`
@@ -102,6 +122,17 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                     subject = ${q(node).property('mailSubject')}
                     text = afx`Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}`
                     html = afx`<h1>Thank you {data.firstName} {data.lastName}</h1><p>from {data.city}, {data.street}</p>`
+                    
+                    attachments {
+                        1.path = "resource://Form.Test/Private/Fusion/Test.translation.csv"
+                        2 {
+                            content = ${Json.stringify(data)}
+                            name = 'data.json'
+                        }
+                        
+                        # this does not work yet
+                        3.field = ${data.file}
+                    }
                 }
             }
 

@@ -10,9 +10,22 @@ use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
 use Neos\Flow\Security\Cryptography\HashService;
 use Neos\Error\Messages\Result;
+use Neos\Flow\Property\PropertyMapper;
+use Neos\Flow\Property\PropertyMappingConfiguration;
 
 class MultiStepFormImplementation  extends AbstractFusionObject
 {
+    /**
+     * @var PropertyMapper
+     * @Flow\Inject
+     */
+    protected $propertyMapper;
+
+    /**
+     * @var PropertyMappingConfiguration
+     * @Flow\Inject
+     */
+    protected $propertyMappingConfiguration;
 
     /**
      * @var HashService
@@ -111,19 +124,33 @@ class MultiStepFormImplementation  extends AbstractFusionObject
 
         $currentStep = $stepCollection->getStepByIdentifier($formState->getCurrentStepIdentifier());
 
-        // validate $submittedData and transfer to data
+        // map and validate submittedData
         $submittedData = [];
         $validationResult = new Result();
-        if ($stepValidationConfigurations = $currentStep->getValidationConfigurations()) {
-            foreach ($stepValidationConfigurations as $name => $validationConfigurations) {
-                $value = $unvalidatedValues[$name] ?? null;
-                $submittedData[$name] = $value;
-                foreach($validationConfigurations as $pathValidationConfiguration) {
+        $stepValidationConfigurations = $currentStep->getValidationConfigurations();
+        $stepTypeConfigurations = $currentStep->getTypeConfigurations();
+
+        if ($stepValidationConfigurations || $stepTypeConfigurations) {
+            $fieldNames = array_unique(array_merge(array_keys($stepValidationConfigurations),array_keys($stepTypeConfigurations)));
+            foreach ($fieldNames as $fieldName ) {
+                $fieldValidationConfigurations = $stepValidationConfigurations[$fieldName] ?? [];
+                $fieldTypeConfiguration =  $stepTypeConfigurations[$fieldName] ?? null;
+
+                $value = $unvalidatedValues[$fieldName] ?? null;
+
+                if ($fieldTypeConfiguration) {
+                    $submittedData[$fieldName] = $this->propertyMapper->convert($value, $fieldTypeConfiguration, $this->propertyMappingConfiguration);
+                } else {
+                    $submittedData[$fieldName] = $value;
+                    $messages = null;
+                }
+
+                foreach($fieldValidationConfigurations as $pathValidationConfiguration) {
                     $validator = $this->validatorResolver->createValidator(
                         $pathValidationConfiguration['identifier'],
                         $pathValidationConfiguration['options'] ?? []
                     );
-                    $validationResult->forProperty($name)->merge($validator->validate($value));
+                    $validationResult->forProperty($fieldName)->merge($validator->validate($submittedData[$fieldName]));
                 }
             }
         }
@@ -210,7 +237,8 @@ class MultiStepFormImplementation  extends AbstractFusionObject
             $data,
             $formState->getFormIdentifier(),
             null,
-            'post'
+            'post',
+            'multipart/form-data'
         );
 
         // push data to context before the content is evaluated

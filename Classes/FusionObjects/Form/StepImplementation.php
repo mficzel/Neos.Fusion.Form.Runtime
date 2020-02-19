@@ -20,4 +20,9 @@ class StepImplementation extends AbstractFusionObject implements StepInterface
     {
         return $this->fusionValue('validators');
     }
+
+    public function getTypeConfigurations(): array
+    {
+        return $this->fusionValue('types') ?? [];
+    }
 }
