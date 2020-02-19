@@ -114,23 +114,19 @@ class EmailActionHandler extends AbstractActionHandler implements ActionHandlerI
      */
     protected function addAttachments(SwiftMailerMessage $mail, array $options)
     {
-        $attachmentConfigurations = $options['attachments'] ?? null;
-        if (is_array($attachmentConfigurations)) {
-            foreach ($attachmentConfigurations as $attachmentConfiguration) {
-                if (isset($attachmentConfiguration['path'])) {
-                    $mail->attach(\Swift_Attachment::fromPath($attachmentConfiguration['path']));
+        $attachments = $options['attachments'] ?? null;
+        if (is_array($attachments)) {
+            foreach ($attachments as $attachment) {
+                if (is_string($attachment)) {
+                    $mail->attach(\Swift_Attachment::fromPath($attachment));
                     continue;
-                } else if (isset($attachmentConfiguration['field'])) {
-                    $resource = $attachmentConfiguration['field'];
-                    if (!$resource instanceof PersistentResource) {
-                        continue;
-                    }
-                    $mail->attach(new \Swift_Attachment(stream_get_contents($resource->getStream()), $resource->getFilename(), $resource->getMediaType()));
+                } else if (is_object($attachment) && ($attachment instanceof PersistentResource)) {
+                    $mail->attach(new \Swift_Attachment(stream_get_contents($attachment->getStream()), $attachment->getFilename(), $attachment->getMediaType()));
                     continue;
-                } else if (isset($attachmentConfiguration['content']) && isset($attachmentConfiguration['name'])) {
-                    $content = $attachmentConfiguration['content'];
-                    $name = $attachmentConfiguration['name'];
-                    $type =  $attachmentConfiguration['type'] ?? MediaTypes::getMediaTypeFromFilename($name);
+                } else if (is_array($attachment) && isset($attachment['content']) && isset($attachment['name'])) {
+                    $content = $attachment['content'];
+                    $name = $attachment['name'];
+                    $type =  $attachment['type'] ?? MediaTypes::getMediaTypeFromFilename($name);
                     $mail->attach(new \Swift_Attachment($content, $name, $type));
                     continue;
                 }

@@ -124,14 +124,14 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                     html = afx`<h1>Thank you {data.firstName} {data.lastName}</h1><p>from {data.city}, {data.street}</p>`
                     
                     attachments {
-                        1.path = "resource://Form.Test/Private/Fusion/Test.translation.csv"
-                        2 {
+                        fromPath = "resource://Form.Test/Private/Fusion/Test.translation.csv"
+                        fromData {
                             content = ${Json.stringify(data)}
                             name = 'data.json'
                         }
                         
                         # this does not work yet
-                        3.field = ${data.file}
+                        fromUpload = ${data.file}
                     }
                 }
             }
