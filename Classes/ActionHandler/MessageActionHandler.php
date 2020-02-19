@@ -8,6 +8,6 @@ class MessageActionHandler extends AbstractActionHandler implements ActionHandle
 {
     public function handle(array $options = []): ?string
     {
-        return $options['content'];
+        return $options['message'];
     }
 }

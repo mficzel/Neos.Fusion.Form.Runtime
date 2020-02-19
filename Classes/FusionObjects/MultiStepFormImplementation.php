@@ -168,7 +168,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
      */
     protected function restoreSerializedFormState(string $lastState): FormState
     {
-        return FormState::jsonDeserialize(json_decode($this->hashService->validateAndStripHmac($lastState), true));
+        return unserialize(base64_decode($this->hashService->validateAndStripHmac($lastState)));
     }
 
     /**
@@ -177,7 +177,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
      */
     protected function serializeFormState(FormState $formState): string
     {
-        return $this->hashService->appendHmac(json_encode($formState->jsonSerialize()));
+        return $this->hashService->appendHmac(base64_encode(serialize($formState)));
     }
 
     /**

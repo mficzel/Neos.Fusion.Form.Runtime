@@ -6,6 +6,7 @@ use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
 use Neos\Fusion\Form\Runtime\Domain\StepInterface;
 use Neos\Fusion\FusionObjects\DataStructureImplementation;
 use Neos\Fusion\Core\Parser;
+use Neos\Fusion\Core\Runtime;
 
 class StepCollectionImplementation extends DataStructureImplementation implements StepCollectionInterface
 {
@@ -66,6 +67,7 @@ class StepCollectionImplementation extends DataStructureImplementation implement
             } catch (\Exception $e) {
                 $value = $this->runtime->handleRenderingException($this->path . '/' . $key, $e);
             }
+
             if ($value === null && $this->runtime->getLastEvaluationStatus() === Runtime::EVALUATION_SKIPPED) {
                 continue;
             }

@@ -90,16 +90,18 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
         actions {
             message {
                 identifier = 'Neos.Fusion.Form.Runtime:Message'
-                options.content = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
+                options.message = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
             }
 
             email {
                 identifier = 'Neos.Fusion.Form.Runtime:Email'
                 options {
-                    from = ${q(node).property('mailFrom')}
-                    to = ${q(node).property('mailTo')}
+                    senderAddress = ${q(node).property('mailFrom')}
+                    recipientAddress = ${q(node).property('mailTo')}
+
                     subject = ${q(node).property('mailSubject')}
                     text = afx`Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}`
+                    html = afx`<h1>Thank you {data.firstName} {data.lastName}</h1><p>from {data.city}, {data.street}</p>`
                 }
             }
 

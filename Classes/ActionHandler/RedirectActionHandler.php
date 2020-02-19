@@ -10,11 +10,14 @@ class RedirectActionHandler extends AbstractActionHandler implements ActionHandl
     public function handle(array $options = []): ?string
     {
         $uri = $options['uri'];
+        $status = $options['status'] ?? 303;
+
         if ($uri) {
             $response = $this->controllerContext->getResponse();
             $response->setComponentParameter(SetHeaderComponent::class, 'Location', $uri);
-            $response->setStatusCode(301);
+            $response->setStatusCode($status);
         }
+
         return null;
     }
 
