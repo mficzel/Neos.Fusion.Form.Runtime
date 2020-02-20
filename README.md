@@ -41,7 +41,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
         # of the steps and can disable single steps. All steps have to be 
         # submitted before the actions are called
         #
-        steps = Neos.Fusion.Form:Form.StepCollection {
+        steps = Neos.Fusion.Form:MultiStepForm.StepCollection {
 
             # 
             # A form step provides a `renderer` and optional `validators` 
@@ -53,7 +53,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
             #
             # This may still change and also allow all values that have __trustedProperties
             #
-            first = Neos.Fusion.Form:Form.Step {
+            first = Neos.Fusion.Form:MultiStepForm.Step {
                 renderer = afx`
                     <fieldset>
                         <legend>name</legend>
