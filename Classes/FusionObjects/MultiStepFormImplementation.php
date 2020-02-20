@@ -178,13 +178,10 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     protected function getSubmittedValues(string $formIdentifier): array
     {
         $request = $this->getRuntime()->getControllerContext()->getRequest();
-        $allSubmittedValues = $request->getHttpRequest()->getParsedBody();
-        if (is_array($allSubmittedValues) && array_key_exists($formIdentifier, $allSubmittedValues)) {
-            $submittedValues = $allSubmittedValues[$formIdentifier];
-        } else {
-            $submittedValues = [];
+        if ($request->hasArgument($formIdentifier)) {
+            return $request->getArgument($formIdentifier);
         }
-        return $submittedValues;
+        return [];
     }
 
     /**

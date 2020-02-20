@@ -1,15 +1,14 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\ActionHandler;
 
-use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Form\Exception\FinisherException;
 use Neos\Fusion\Form\Runtime\Domain\AbstractActionHandler;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerException;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
 use Neos\SwiftMailer\Message as SwiftMailerMessage;
-use Neos\Utility\ObjectAccess;
 use Neos\Utility\MediaTypes;
+use Psr\Http\Message\UploadedFileInterface;
 
 class EmailActionHandler extends AbstractActionHandler implements ActionHandlerInterface
 {
@@ -119,6 +118,9 @@ class EmailActionHandler extends AbstractActionHandler implements ActionHandlerI
             foreach ($attachments as $attachment) {
                 if (is_string($attachment)) {
                     $mail->attach(\Swift_Attachment::fromPath($attachment));
+                    continue;
+                } else if (is_object($attachment) && ($attachment instanceof UploadedFileInterface)) {
+                    $mail->attach(new \Swift_Attachment(stream_get_contents($attachment->getStream()), $attachment->getClientFilename(), $attachment->getClientMediaType()));
                     continue;
                 } else if (is_object($attachment) && ($attachment instanceof PersistentResource)) {
                     $mail->attach(new \Swift_Attachment(stream_get_contents($attachment->getStream()), $attachment->getFilename(), $attachment->getMediaType()));

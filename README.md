@@ -92,7 +92,6 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 `
 
                 types {
-                    # this does not work yet
                     file = 'Neos\\Flow\\ResourceManagement\\PersistentResource'
                 }
             }
@@ -130,8 +129,6 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                             content = ${Json.stringify(data)}
                             name = 'data.json'
                         }
-                        
-                        # this does not work yet
                         fromUpload = ${data.file}
                     }
                 }
