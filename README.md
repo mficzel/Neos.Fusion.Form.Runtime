@@ -135,6 +135,16 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                     }
                 }
             }
+            
+            log {
+                identifier = 'Neos.Fusion.Form.Runtime:Log'
+                options {
+                    logger = 'systemLogger'
+                    level = 'info'
+                    message = 'Form was submitted'
+                    context = ${data}
+                }
+            }
 
             redirect {
                 identifier = 'Neos.Fusion.Form.Runtime:Redirect'
