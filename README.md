@@ -4,17 +4,18 @@ Pure fusion form runtime with afx support!
 
 ## !!! This is experimental and may turn out to be a totally stupid idea!!!
 
-## Pain points i try to adress with this
+## Pain points i try to address with this
 
 - Ist is hard to get access to node-data in finishers (email address, redirect targets)
 - It is hard to configure parts of the form from node-data (disable steps, disable parts of the form)
 - It is tedious to render custom markup for (grids, fieldTypes, content between fields)
+- Form support only a flat list of arguments and no domain objects
 - Forms are very hard to extend as you had to deal with settings.yaml, form.yaml and Fluid  
 
-## Possible new pain points
+## Possible new pain points of this
 
-- Validation is defined seperately from rendering
-- Every property needs at least one validator
+- Validation and Types are defined seperately from rendering
+- Every property needs at least one validator or a type
 
 ## Define a form with validation and finishing actions entirely in fusion:
 
