@@ -24,15 +24,36 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
 
     renderer = Neos.Fusion.Form:MultiStepForm {
 
-        data = Neos.Fusion:DataStructure {
-            firstName = "aaaa"
-        }
-
+        #
+        # The form identifier, this is used as argument namespace for the 
+        # form to seperate the values form other forms 
+        #
         identifier = "exampleForm2"
 
-        steps {
+        #
+        # The initial `data` of the form, will be used to prefill the input
+        # elements. During steps the data is serialized and signed with a hmac
+        #
+        data = Neos.Fusion:DataStructure 
 
-            first {
+        #
+        # The collection of form steps, the collection defines the order
+        # of the steps and can disable single steps. All steps have to be 
+        # submitted before the actions are called
+        #
+        steps = Neos.Fusion.Form:Form.StepCollection {
+
+            # 
+            # A form step provides a `renderer` and optional `validators` 
+            # and `types`. 
+            #
+            # HINT: Only value that have `validators` or a `type` are Added to the 
+            # form state. Other values are ignored as they may easyly be manipulated
+            # from outside and cannot be trusted. 
+            #
+            # This may still change and also allow all values that have __trustedProperties
+            #
+            first = Neos.Fusion.Form:Form.Step {
                 renderer = afx`
                     <fieldset>
                         <legend>name</legend>
@@ -96,9 +117,15 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 }
             }
 
+            #
+            # A confirmation step can be added as any other step. The submitted
+            # `data` is available and can be used for rendering. 
+            #
+            # HINT: Be aware that this is untrusted data that should be escaped
+            #
             confirmation {
                 renderer = afx`
-                    <h1>Confirm to submit {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>
+                    <h1>Confirm to submit {String.htmlSpecialChars(data.firstName + ' ' + data.lastName)} from {String.htmlSpecialChars( data.city + ', ' + data.street)}</h1>
                     <div>
                         <Neos.Fusion.Form:Button field.name="__step" field.value="second">Back</Neos.Fusion.Form:Button>
                         <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
@@ -107,12 +134,32 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
             }
         }
 
-        actions {
+        #
+        # The actions are evaluated after all steps were sucessfully submitted
+        # Each action has an `identifier` that is used to identify the ActionHandler 
+        # and an `options` DataStructure. 
+        #
+        # The identifier can be a fully qualified classname or a PackageName:IdentifierName
+        # that will be converted to a className
+        #
+        actions = Neos.Fusion:DataStructure {
+        
+            #
+            # The message action accepts a single option `message` that is returned directly
+            # You should be careful with this as it will not prevent reloading and calling
+            # all action n-times 
+            # 
             message {
                 identifier = 'Neos.Fusion.Form.Runtime:Message'
-                options.message = afx`<h1>Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}</h1>`
+                options.message = afx`<h1>Thank you {String.htmlSpecialChars(data.firstName + ' ' + data.lastName)}</h1>`
             }
 
+            #
+            # EMail action with attachment and multipart email support
+            # the Neos.Swiftmailer package is required
+            # 
+            # HINT: Be aware that this is untrusted data that should be escaped 
+            #
             email {
                 identifier = 'Neos.Fusion.Form.Runtime:Email'
                 options {
@@ -120,20 +167,24 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                     recipientAddress = ${q(node).property('mailTo')}
 
                     subject = ${q(node).property('mailSubject')}
-                    text = afx`Thank you {data.firstName} {data.lastName} from {data.city}, {data.street}`
-                    html = afx`<h1>Thank you {data.firstName} {data.lastName}</h1><p>from {data.city}, {data.street}</p>`
+                    
+                    text = afx`Thank you {String.htmlSpecialChars(data.firstName + ' ' + data.lastName)} from {String.htmlSpecialChars(data.city)}, {String.htmlSpecialChars(data.street)}`
+                    html = afx`<h1>Thank you {String.htmlSpecialChars(data.firstName + ' ' + data.lastName)} {data.lastName}</h1><p>from {String.htmlSpecialChars(data.city)}, {String.htmlSpecialChars(data.street)}</p>`
                     
                     attachments {
+                        fromUpload = ${data.file}
                         fromPath = "resource://Form.Test/Private/Fusion/Test.translation.csv"
                         fromData {
                             content = ${Json.stringify(data)}
                             name = 'data.json'
                         }
-                        fromUpload = ${data.file}
                     }
                 }
             }
             
+            #
+            # Log action, can use all PSR Logger the LoggerFactory can create
+            #
             log {
                 identifier = 'Neos.Fusion.Form.Runtime:Log'
                 options {
@@ -144,6 +195,11 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 }
             }
 
+            #
+            # Redirect action, sends a redirect to a thankyou page. This allows
+            # to place generic content on that page and prevents reloading and
+            # retriggering the actions 
+            #
             redirect {
                 identifier = 'Neos.Fusion.Form.Runtime:Redirect'
                 options {
