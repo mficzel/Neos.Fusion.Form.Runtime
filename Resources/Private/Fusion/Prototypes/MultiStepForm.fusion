@@ -1,0 +1,29 @@
+prototype(Neos.Fusion.Form:MultiStepForm) {
+    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\MultiStepFormImplementation'
+
+    identifier = null
+    data = Neos.Fusion:DataStructure
+    steps = Neos.Fusion.Form:MultiStepForm.StepCollection
+    actions = Neos.Fusion:DataStructure
+
+    renderer = afx`
+        <Neos.Fusion.Form:Form
+                form={form}
+        >
+            <Neos.Fusion.Form:Hidden field.name="__state" />
+            {content}
+        </Neos.Fusion.Form:Form>
+    `
+
+    #
+    # @todo this should become a dynamic segment to allow caching of the first page
+    #
+    @cache {
+        mode = 'uncached'
+        context {
+            1 = 'node'
+            2 = 'documentNode'
+            3 = 'site'
+        }
+    }
+}

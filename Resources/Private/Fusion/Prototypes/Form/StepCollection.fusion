@@ -1,0 +1,1 @@
+prototype(Neos.Fusion.Form:MultiStepForm.StepCollection).@class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepCollectionImplementation'

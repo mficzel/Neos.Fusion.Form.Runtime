@@ -57,12 +57,12 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 renderer = afx`
                     <fieldset>
                         <legend>name</legend>
-                        <Neos.Fusion.Form:Neos.BackendModule.FieldContainer field.name="firstName" label="First Name">
+                        <Neos.Fusion.Form:FieldContainer field.name="firstName" label="First Name">
                             <Neos.Fusion.Form:Input />
-                        </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
-                        <Neos.Fusion.Form:Neos.BackendModule.FieldContainer field.name="lastName" label="Last Name">
+                        </Neos.Fusion.Form:FieldContainer>
+                        <Neos.Fusion.Form:FieldContainer field.name="lastName" label="Last Name">
                             <Neos.Fusion.Form:Input />
-                        </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
+                        </Neos.Fusion.Form:FieldContainer>
                     </fieldset>
                     <div>
                         <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
@@ -79,12 +79,12 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 renderer = afx`
                     <fieldset>
                         <legend>address</legend>
-                        <Neos.Fusion.Form:Neos.BackendModule.FieldContainer field.name="street" label="Street">
+                        <Neos.Fusion.Form:FieldContainer field.name="street" label="Street">
                             <Neos.Fusion.Form:Input />
-                        </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
-                        <Neos.Fusion.Form:Neos.BackendModule.FieldContainer field.name="city" label="City">
+                        </Neos.Fusion.Form:FieldContainer>
+                        <Neos.Fusion.Form:FieldContainer field.name="city" label="City">
                             <Neos.Fusion.Form:Input />
-                        </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
+                        </Neos.Fusion.Form:FieldContainer>
                     </fieldset>
                     <div>
                         <Neos.Fusion.Form:Button field.name="__step" field.value="first">Back</Neos.Fusion.Form:Button>
@@ -102,9 +102,9 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 renderer = afx`
                     <fieldset>
                         <legend>file</legend>
-                        <Neos.Fusion.Form:Neos.BackendModule.FieldContainer field.name="file" label="Street">
+                        <Neos.Fusion.Form:FieldContainer field.name="file" label="Street">
                             <Neos.Fusion.Form:Upload />
-                        </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
+                        </Neos.Fusion.Form:FieldContainer>
                     </fieldset>
                     <div>
                         <Neos.Fusion.Form:Button field.name="__step" field.value="second">Back</Neos.Fusion.Form:Button>
