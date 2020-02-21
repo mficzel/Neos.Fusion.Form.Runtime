@@ -212,3 +212,68 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
     }
 }
 ``` 
+
+## A more realistic scenario that uses presentational components will look more like this
+
+```
+prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent) {
+
+    renderer = Neos.Fusion.Form:MultiStepForm {
+
+        identifier = "exampleForm3"
+        data = Neos.Fusion:DataStructure 
+        steps {
+            person {
+                renderer = Vendor.Site:Component.Organism.CallbackForm.Step.Person
+                validators = Vendor.Site:Component.Organism.CallbackForm.Step.Person.Validators
+            }
+
+            address {
+                renderer = Vendor.Site:Component.Organism.CallbackForm.Step.Address
+                validators = Vendor.Site:Component.Organism.CallbackForm.Step.Address.Validators
+            }
+            
+            file {
+                renderer = Vendor.Site:Component.Organism.CallbackForm.Step.File
+                types = Vendor.Site:Component.Organism.CallbackForm.Step.File.Types
+            }
+
+            confirmation {
+                renderer = renderer = Vendor.Site:Component.Organism.CallbackForm.Step.Confirmation {
+                    data = ${data}
+                }
+            }
+        }
+
+        actions = Neos.Fusion:DataStructure {
+
+            email {
+                identifier = 'Neos.Fusion.Form.Runtime:Email'
+                options {
+                    senderAddress = ${q(node).property('mailFrom')}
+                    recipientAddress = ${q(node).property('mailTo')}
+                    subject = ${q(node).property('mailSubject')}
+                    text = Vendor.Site:Component.Organism.CallbackForm.Action.Email.Text {
+                        data =  ${data}
+                    }                    
+                    html = Vendor.Site:Component.Organism.CallbackForm.Action.Email.Html {
+                        data =  ${data}
+                    }
+                    attachments {
+                        fromUpload = ${data.file}
+                    }
+                }
+            }
+            
+            redirect {
+                identifier = 'Neos.Fusion.Form.Runtime:Redirect'
+                options {
+                    uri = Neos.Neos:NodeUri {
+                        node = ${q(node).property('thankyou')}
+                    }
+                }
+            }
+        }
+    }
+}
+``` 
