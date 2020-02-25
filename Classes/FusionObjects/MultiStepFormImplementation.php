@@ -7,6 +7,7 @@ use Neos\Fusion\Form\Domain\Form;
 use Neos\Flow\Validation\ValidatorResolver;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerResolver;
 use Neos\Fusion\Form\Runtime\Domain\FormState;
+use Neos\Fusion\Form\Runtime\Domain\SerializableUploadedFile;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
 use Neos\Flow\Security\Cryptography\HashService;
@@ -14,6 +15,7 @@ use Neos\Error\Messages\Result;
 use Neos\Flow\Property\PropertyMapper;
 use Neos\Flow\Property\PropertyMappingConfiguration;
 use Neos\Cache\Frontend\VariableFrontend;
+use Psr\Http\Message\UploadedFileInterface;
 
 class MultiStepFormImplementation  extends AbstractFusionObject
 {
@@ -149,20 +151,8 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         $stepTypeConfigurations = $currentStep->getTypeConfigurations();
 
         if ($stepValidationConfigurations || $stepTypeConfigurations) {
-            $fieldNames = array_unique(array_merge(array_keys($stepValidationConfigurations),array_keys($stepTypeConfigurations)));
-            foreach ($fieldNames as $fieldName ) {
-                $fieldValidationConfigurations = $stepValidationConfigurations[$fieldName] ?? [];
-                $fieldTypeConfiguration =  $stepTypeConfigurations[$fieldName] ?? null;
-
-                $value = $unvalidatedValues[$fieldName] ?? null;
-
-                if ($fieldTypeConfiguration) {
-                    $submittedData[$fieldName] = $this->propertyMapper->convert($value, $fieldTypeConfiguration, $this->propertyMappingConfiguration);
-                } else {
-                    $submittedData[$fieldName] = $value;
-                    $messages = null;
-                }
-
+            foreach ($stepValidationConfigurations as $fieldName => $fieldValidationConfigurations) {
+                $submittedData[$fieldName] = $unvalidatedValues[$fieldName] ?? null;
                 foreach($fieldValidationConfigurations as $pathValidationConfiguration) {
                     $validator = $this->validatorResolver->createValidator(
                         $pathValidationConfiguration['identifier'],
@@ -203,7 +193,20 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     {
         $request = $this->getRuntime()->getControllerContext()->getRequest();
         if ($request->hasArgument($formIdentifier)) {
-            return $request->getArgument($formIdentifier);
+            $submittedValues = $request->getArgument($formIdentifier);
+            if (is_array($submittedValues)) {
+                $submittedValues = array_map(
+                    function($item) {
+                        if ($item instanceof UploadedFileInterface) {
+                            return SerializableUploadedFile::fromUploadedFile($item);
+                        } else {
+                            return $item;
+                        }
+                    },
+                    $submittedValues
+                );
+            }
+            return $submittedValues;
         }
         return [];
     }

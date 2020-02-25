@@ -111,9 +111,16 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                         <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
                     </div>
                 `
+                
+                validators {
+                    file.notEmpty.identifier = 'Neos.Flow:NotEmpty'
+                    file.limitFileTypes {
+                        identifier = 'Neos.Fusion.Form.Runtime:UploadedFile'
+                        options {
+                            allowedExtensions = ${['svg', 'txt', 'jpg']}
+                        }
+                    }
 
-                types {
-                    file = 'Neos\\Flow\\ResourceManagement\\PersistentResource'
                 }
             }
 

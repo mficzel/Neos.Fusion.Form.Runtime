@@ -120,7 +120,7 @@ class EmailActionHandler extends AbstractActionHandler implements ActionHandlerI
                     $mail->attach(\Swift_Attachment::fromPath($attachment));
                     continue;
                 } else if (is_object($attachment) && ($attachment instanceof UploadedFileInterface)) {
-                    $mail->attach(new \Swift_Attachment(stream_get_contents($attachment->getStream()), $attachment->getClientFilename(), $attachment->getClientMediaType()));
+                    $mail->attach(new \Swift_Attachment($attachment->getStream()->getContents(), $attachment->getClientFilename(), $attachment->getClientMediaType()));
                     continue;
                 } else if (is_object($attachment) && ($attachment instanceof PersistentResource)) {
                     $mail->attach(new \Swift_Attachment(stream_get_contents($attachment->getStream()), $attachment->getFilename(), $attachment->getMediaType()));
