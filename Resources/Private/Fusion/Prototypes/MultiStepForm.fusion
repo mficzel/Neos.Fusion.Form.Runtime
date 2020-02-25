@@ -10,7 +10,8 @@ prototype(Neos.Fusion.Form:MultiStepForm) {
         <Neos.Fusion.Form:Form
                 form={form}
         >
-            <Neos.Fusion.Form:Hidden field.name="__state" />
+            <Neos.Fusion.Form:Hidden field.name="__state" attributes.value={stateIdentifier} @if.has={stateIdentifier} />
+            <Neos.Fusion.Form:Hidden field.name="__step" attributes.value={stepIdentifier} @if.has={stepIdentifier} />
             {content}
         </Neos.Fusion.Form:Form>
     `

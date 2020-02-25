@@ -3,11 +3,11 @@ namespace Neos\Fusion\Form\Runtime\Domain;
 
 use Neos\Utility\Arrays;
 
-class FormState implements \JsonSerializable
+class FormState
 {
+    protected $identifier = null;
     protected $formIdentifier = null;
     protected $submittedStepIdentifiers = [];
-    protected $currentStepIdentifier = null;
     protected $currentData = null;
 
     /**
@@ -16,10 +16,9 @@ class FormState implements \JsonSerializable
      * @param array $currentStep
      * @param null $currentData
      */
-    public function __construct(string $formIdentifier, string $currentStepIdentifier, array $currentData, array $submittedStepIdentifiers = [] )
+    public function __construct(string $formIdentifier, array $currentData, array $submittedStepIdentifiers = [] )
     {
         $this->formIdentifier = $formIdentifier;
-        $this->currentStepIdentifier = $currentStepIdentifier;
         $this->currentData = $currentData;
         $this->submittedStepIdentifiers = $submittedStepIdentifiers;
     }
@@ -30,34 +29,14 @@ class FormState implements \JsonSerializable
      */
     public function withDataForStep(string $stepIdentifier, array $stepData): self
     {
-        $formIdentifier = $this->getFormIdentifier();
-        $currentStep = $this->getCurrentStepIdentifier();
         $currentData = Arrays::arrayMergeRecursiveOverrule($this->getCurrentData(), $stepData);
-
         $submittedStepIdentifiers = $this->getSubmittedStepIdentifiers();
         if (!in_array($stepIdentifier, $submittedStepIdentifiers)) {
             $submittedStepIdentifiers[] = $stepIdentifier;
         }
 
         return new static(
-            $formIdentifier,
-            $currentStep,
-            $currentData,
-            $submittedStepIdentifiers
-        );
-    }
-
-    /**
-     * @param string $stepIdentifier
-     */
-    public function withStep(string $stepIdentifier) {
-        $formIdentifier = $this->getFormIdentifier();
-        $currentData = $this->getCurrentData();
-        $submittedStepIdentifiers = $this->getSubmittedStepIdentifiers();
-
-        return new static(
-            $formIdentifier,
-            $stepIdentifier,
+            $this->getFormIdentifier(),
             $currentData,
             $submittedStepIdentifiers
         );
@@ -81,14 +60,6 @@ class FormState implements \JsonSerializable
     }
 
     /**
-     * @return array
-     */
-    public function getCurrentStepIdentifier(): string
-    {
-        return $this->currentStepIdentifier;
-    }
-
-    /**
      * @return null
      */
     public function getCurrentData()
@@ -104,31 +75,4 @@ class FormState implements \JsonSerializable
         return $this->submittedStepIdentifiers;
     }
 
-    /**
-     * @return array
-     */
-    public function jsonSerialize(): array
-    {
-        return [
-            'formIdentifier' => $this->formIdentifier,
-            'currentStepIdentifier' => $this->currentStepIdentifier,
-            'currentData' => $this->currentData,
-            'submittedStepIdentifiers' => $this->submittedStepIdentifiers,
-        ];
-    }
-
-    /**
-     * @param array $data
-     * @return FormState
-     * @throws \Neos\Flow\ObjectManagement\Exception\UnresolvedDependenciesException
-     */
-    public static function jsonDeserialize(array $data): self
-    {
-        return new static(
-            $data['formIdentifier'],
-            $data['currentStepIdentifier'],
-            $data['currentData'],
-            $data['submittedStepIdentifiers']
-        );
-    }
 }

@@ -2,6 +2,7 @@
 namespace Neos\Fusion\Form\Runtime\FusionObjects;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Utility\Algorithms;
 use Neos\Fusion\Form\Domain\Form;
 use Neos\Flow\Validation\ValidatorResolver;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerResolver;
@@ -12,6 +13,7 @@ use Neos\Flow\Security\Cryptography\HashService;
 use Neos\Error\Messages\Result;
 use Neos\Flow\Property\PropertyMapper;
 use Neos\Flow\Property\PropertyMappingConfiguration;
+use Neos\Cache\Frontend\VariableFrontend;
 
 class MultiStepFormImplementation  extends AbstractFusionObject
 {
@@ -44,6 +46,12 @@ class MultiStepFormImplementation  extends AbstractFusionObject
      * @Flow\Inject
      */
     protected $actionHandlerResolver;
+
+    /**
+     * @var VariableFrontend
+     * @Flow\Inject
+     */
+    protected $stateCache;
 
     /**
      * @return string
@@ -87,42 +95,52 @@ class MultiStepFormImplementation  extends AbstractFusionObject
 
         // handle submitted values
         $unvalidatedValues = $this->getSubmittedValues($formIdentifier);
+        $stateIdentifier = $unvalidatedValues['__state'] ?? null;
+        $stepIdentifier = $unvalidatedValues['__step'] ?? null;
+        $targetStepIdentifier = $unvalidatedValues['__targetStep'] ?? null;
 
         // if no values are submitted render the first step directly
-        if (!array_key_exists('__state' , $unvalidatedValues)) {
+        if (!$stepIdentifier) {
             $formState = new FormState (
                 $formIdentifier,
-                $stepCollection->getFirstStepIdentifier(),
                 $this->getData()
             );
 
             return $this->renderForm (
                 $formState,
                 new Result(),
-                []
+                [],
+                null,
+                $stepCollection->getFirstStepIdentifier()
             );
         }
 
         // restore previous form state
-        $formState = $this->restoreSerializedFormState($unvalidatedValues['__state']);
-        if ($formIdentifier !== $formState->getFormIdentifier()) {
-            throw new \Exception('Strange things happen here');
+        if ($stateIdentifier) {
+            $formState = $this->getCachedFormState($stateIdentifier);
+        } else {
+            $formState = new FormState (
+                $formIdentifier,
+                $this->getData()
+            );
         }
 
         // when a step is requested directly no submitted values are handled
         // only already submitted steps can be adressed
-        if (array_key_exists('__step' , $unvalidatedValues)) {
-            if ($formState->hasStep($unvalidatedValues['__step'])) {
-                $formState = $formState->withStep($unvalidatedValues['__step']);
+        if ($targetStepIdentifier) {
+            if ($formState->hasStep($targetStepIdentifier) == false) {
+                throw new \Exception("this is fishy");
             }
             return $this->renderForm(
                 $formState,
                 new Result(),
-                []
+                [],
+                $stateIdentifier,
+                $targetStepIdentifier
             );
         }
 
-        $currentStep = $stepCollection->getStepByIdentifier($formState->getCurrentStepIdentifier());
+        $currentStep = $stepCollection->getStepByIdentifier($stepIdentifier);
 
         // map and validate submittedData
         $submittedData = [];
@@ -158,17 +176,23 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         // when validation was successfull render next step or invoke the action handlers
         if ($validationResult->hasErrors() === false) {
             $formState = $formState->withDataForStep(
-                $formState->getCurrentStepIdentifier(),
+                $stepIdentifier,
                 $submittedData
             );
-            if ($nextIdentifier = $stepCollection->getNextStepIdentifier($formState->getCurrentStepIdentifier())) {
-                $formState = $formState->withStep($nextIdentifier);
+
+            if ($nextStepIdentifier = $stepCollection->getNextStepIdentifier($stepIdentifier)) {
+                $stepIdentifier = $nextStepIdentifier;
             } else {
-                return  $this->invokeActionHandlers($formState);
+                $messages = $this->invokeActionHandlers($formState);
+                $this->removeFormStateFromCache($stateIdentifier);
+                return $messages;
             }
         }
 
-        return $this->renderForm($formState, $validationResult, $submittedData);
+        // add serialized state to the form data
+        $stateIdentifier = $this->storeFormStateToCache($formState, $stateIdentifier);
+
+        return $this->renderForm($formState, $validationResult, $submittedData, $stateIdentifier, $stepIdentifier);
     }
 
     /**
@@ -185,23 +209,44 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     }
 
     /**
-     * @param string $lastState
+     * @param string $identifier
      * @return FormState
      * @throws \Neos\Flow\Security\Exception\InvalidArgumentForHashGenerationException
      * @throws \Neos\Flow\Security\Exception\InvalidHashException
      */
-    protected function restoreSerializedFormState(string $lastState): FormState
+    protected function getCachedFormState(string $identifier): ?FormState
     {
-        return unserialize(base64_decode($this->hashService->validateAndStripHmac($lastState)));
+        $cachedState = $this->stateCache->get($identifier);
+        if ($cachedState && $cachedState instanceof FormState) {
+            return $cachedState;
+        } else {
+            return null;
+        }
     }
 
     /**
      * @param FormState $formState
+     * @param string|null $identifier
      * @return string
+     * @throws \Neos\Cache\Exception
      */
-    protected function serializeFormState(FormState $formState): string
+    protected function storeFormStateToCache(FormState $formState, string $identifier = null): string
     {
-        return $this->hashService->appendHmac(base64_encode(serialize($formState)));
+        if (is_null($identifier)) {
+            $identifier = Algorithms::generateUUID();
+        }
+        $this->stateCache->set($identifier, $formState);
+        return $identifier;
+    }
+
+    /**
+     * @param string|null $identifier
+     * @return string
+     * @throws \Neos\Cache\Exception
+     */
+    protected function removeFormStateFromCache(string $identifier = null): void
+    {
+        $this->stateCache->remove($identifier);
     }
 
     /**
@@ -210,19 +255,13 @@ class MultiStepFormImplementation  extends AbstractFusionObject
      * @param string $stepIdentifier
      * @param Result $validationResult
      * @param array $submittedData
+     * @param string $stateIdentifier
+     * @param string $stepIdentifier
      * @return string
      */
-    protected function renderForm(FormState $formState, Result $validationResult, array $submittedData): string
+    protected function renderForm(FormState $formState, Result $validationResult, array $submittedData, string $stateIdentifier = null, string $stepIdentifier): string
     {
-        $step = $this->getStepCollection()->getStepByIdentifier($formState->getCurrentStepIdentifier());
-
-        // add serialized state to the form data
-        $serializedState = $this->serializeFormState($formState);
-
-        // push __state to data for rendering
-        $data = $formState->getCurrentData();
-        $data['__state'] = $serializedState;
-        $submittedData['__state'] = $serializedState;
+        $step = $this->getStepCollection()->getStepByIdentifier($stepIdentifier);
 
         // use a fake request until we can pass the validation result and submitted values directly to the form
         $request = clone $this->getRuntime()->getControllerContext()->getRequest();
@@ -231,7 +270,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
 
         $form = new Form (
             $request,
-            $data,
+            $formState->getCurrentData(),
             $formState->getFormIdentifier(),
             null,
             'post',
@@ -240,8 +279,10 @@ class MultiStepFormImplementation  extends AbstractFusionObject
 
         // push data to context before the content is evaluated
         $this->getRuntime()->pushContextArray([
+            'stateIdentifier' => $stateIdentifier,
+            'stepIdentifier' => $stepIdentifier,
             'form' => $form,
-            'data' => $data
+            'data' => $formState->getCurrentData()
         ]);
 
         // evaluate content

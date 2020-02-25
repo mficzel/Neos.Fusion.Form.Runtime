@@ -87,7 +87,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                         </Neos.Fusion.Form:FieldContainer>
                     </fieldset>
                     <div>
-                        <Neos.Fusion.Form:Button field.name="__step" field.value="first">Back</Neos.Fusion.Form:Button>
+                        <Neos.Fusion.Form:Button field.name="__targetStep" field.value="first">Back</Neos.Fusion.Form:Button>
                         <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
                     </div>
                 `
@@ -107,7 +107,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                         </Neos.Fusion.Form:FieldContainer>
                     </fieldset>
                     <div>
-                        <Neos.Fusion.Form:Button field.name="__step" field.value="second">Back</Neos.Fusion.Form:Button>
+                        <Neos.Fusion.Form:Button field.name="__targetStep" field.value="second">Back</Neos.Fusion.Form:Button>
                         <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
                     </div>
                 `
@@ -127,7 +127,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
                 renderer = afx`
                     <h1>Confirm to submit {String.htmlSpecialChars(data.firstName + ' ' + data.lastName)} from {String.htmlSpecialChars( data.city + ', ' + data.street)}</h1>
                     <div>
-                        <Neos.Fusion.Form:Button field.name="__step" field.value="second">Back</Neos.Fusion.Form:Button>
+                        <Neos.Fusion.Form:Button field.name="__targetStep" field.value="second">Back</Neos.Fusion.Form:Button>
                         <Neos.Fusion.Form:Button>Submit</Neos.Fusion.Form:Button>
                     </div>
                 `

@@ -1,0 +1,9 @@
+Neos\Fusion\Form\Runtime\FusionObjects\MultiStepFormImplementation:
+  properties:
+    stateCache:
+      object:
+        factoryObjectName: Neos\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: Neos_Fusion_Form_State
