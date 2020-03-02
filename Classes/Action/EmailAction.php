@@ -1,16 +1,17 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\ActionHandler;
+namespace Neos\Fusion\Form\Runtime\Action;
 
 use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Form\Exception\FinisherException;
-use Neos\Fusion\Form\Runtime\Domain\AbstractActionHandler;
+use Neos\Fusion\Form\Runtime\Domain\AbstractAction;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerException;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionResponseInterface;
 use Neos\SwiftMailer\Message as SwiftMailerMessage;
 use Neos\Utility\MediaTypes;
 use Psr\Http\Message\UploadedFileInterface;
 
-class EmailActionHandler extends AbstractActionHandler implements ActionHandlerInterface
+class EmailAction implements ActionInterface
 {
 
     /**
@@ -19,7 +20,7 @@ class EmailActionHandler extends AbstractActionHandler implements ActionHandlerI
      * @throws ActionHandlerException
      * @throws FinisherException
      */
-    public function handle(array $options = []): ?string
+    public function handle(array $options = []): ?ActionResponseInterface
     {
         if (!class_exists(SwiftMailerMessage::class)) {
             throw new ActionHandlerException('The "neos/swiftmailer" doesn\'t seem to be installed, but is required for the EmailFinisher to work!', 1503392532);

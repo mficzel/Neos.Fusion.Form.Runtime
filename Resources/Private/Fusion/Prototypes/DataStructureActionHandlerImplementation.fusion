@@ -1,0 +1,4 @@
+
+prototype(Neos.Fusion.Form:DataStructureActionHandler) {
+    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\DataStructureActionHandlerImplementation'
+}

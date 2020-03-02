@@ -2,9 +2,12 @@ prototype(Neos.Fusion.Form:MultiStepForm) {
     @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\MultiStepFormImplementation'
 
     identifier = null
+
     data = Neos.Fusion:DataStructure
+
     steps = Neos.Fusion.Form:MultiStepForm.StepCollection
-    actions = Neos.Fusion:DataStructure
+
+    actions = Neos.Fusion.Form:DataStructureActionHandler
 
     renderer = afx`
         <Neos.Fusion.Form:Form

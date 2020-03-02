@@ -3,7 +3,7 @@ namespace Neos\Fusion\Form\Runtime\Domain;
 
 use Neos\Flow\Mvc\Controller\ControllerContext;
 
-abstract class AbstractActionHandler implements ActionHandlerInterface
+abstract class AbstractAction implements ActionInterface
 {
     /**
      * @var ControllerContext

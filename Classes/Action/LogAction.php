@@ -1,12 +1,13 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\ActionHandler;
+namespace Neos\Fusion\Form\Runtime\Action;
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Fusion\Form\Runtime\Domain\AbstractActionHandler;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
+use Neos\Fusion\Form\Runtime\Domain\AbstractAction;
+use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
 use Neos\Flow\Log\PsrLoggerFactoryInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionResponseInterface;
 
-class LogActionHandler  extends AbstractActionHandler implements ActionHandlerInterface
+class LogAction implements ActionInterface
 {
     /**
      * @Flow\Inject
@@ -18,7 +19,7 @@ class LogActionHandler  extends AbstractActionHandler implements ActionHandlerIn
      * @param array $options
      * @return string|null
      */
-    public function handle(array $options = []): ?string
+    public function handle(array $options = []): ?ActionResponseInterface
     {
         $logger = $this->loggerFactory->get($options['logger'] ?? 'systemLogger');
 

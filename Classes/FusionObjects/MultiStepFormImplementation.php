@@ -5,7 +5,8 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Utility\Algorithms;
 use Neos\Fusion\Form\Domain\Form;
 use Neos\Flow\Validation\ValidatorResolver;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerResolver;
+use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionResolver;
 use Neos\Fusion\Form\Runtime\Domain\FormState;
 use Neos\Fusion\Form\Runtime\Domain\SerializableUploadedFile;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
@@ -44,7 +45,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     protected $validatorResolver;
 
     /**
-     * @var ActionHandlerResolver
+     * @var ActionResolver
      * @Flow\Inject
      */
     protected $actionHandlerResolver;
@@ -82,7 +83,7 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     /**
      * @return array
      */
-    protected function getActionConfigurations(): array
+    protected function getActionHandler(): ActionHandlerInterface
     {
         return  $this->fusionValue('actions');
     }
@@ -173,9 +174,8 @@ class MultiStepFormImplementation  extends AbstractFusionObject
             if ($nextStepIdentifier = $stepCollection->getNextStepIdentifier($stepIdentifier)) {
                 $stepIdentifier = $nextStepIdentifier;
             } else {
-                $messages = $this->invokeActionHandlers($formState);
-                $this->removeFormStateFromCache($stateIdentifier);
-                return $messages;
+                $actionHandler = $this->getActionHandler();
+                return $actionHandler->handle($formState->getCurrentData(), $this->getRuntime()->getControllerContext());
             }
         }
 
@@ -294,24 +294,5 @@ class MultiStepFormImplementation  extends AbstractFusionObject
         $this->getRuntime()->popContext();
         $this->getRuntime()->popContext();
         return $result;
-    }
-
-    /**
-     * @param FormState $formState
-     * @return string
-     * @throws \Neos\Fusion\Form\Runtime\Domain\NoSuchActionHandlerException
-     */
-    protected function invokeActionHandlers(FormState $formState): string
-    {
-        $data = $formState->getCurrentData();
-        $messages = [];
-        $this->getRuntime()->pushContext('data', $data);
-        $actionConfigurations = $this->getActionConfigurations();
-        foreach ($actionConfigurations as $actionConfiguration) {
-            $action = $this->actionHandlerResolver->createActionHandler($actionConfiguration['identifier'], $this->runtime->getControllerContext());
-            $messages[] = $action->handle($actionConfiguration['options'] ?? []);
-        }
-        $this->getRuntime()->popContext();
-        return implode('', array_filter($messages));
     }
 }

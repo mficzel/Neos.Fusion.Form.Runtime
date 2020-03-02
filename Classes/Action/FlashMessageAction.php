@@ -1,5 +1,5 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\ActionHandler;
+namespace Neos\Fusion\Form\Runtime\Action;
 
 use Neos\Error\Messages\Error;
 use Neos\Error\Messages\Message;
@@ -10,11 +10,11 @@ use Neos\Flow\Mvc\Exception\InvalidFlashMessageConfigurationException;
 use Neos\Flow\Mvc\FlashMessage\FlashMessageService;
 use Neos\Flow\Security\Exception\InvalidRequestPatternException;
 use Neos\Flow\Security\Exception\NoRequestPatternFoundException;
-use Neos\Fusion\Form\Runtime\Domain\AbstractActionHandler;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerException;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionResponseInterface;
 
-class FlashMessageActionHandler  extends AbstractActionHandler implements ActionHandlerInterface
+class FlashMessageAction  implements ActionInterface
 {
     /**
      * @Flow\Inject
@@ -29,7 +29,7 @@ class FlashMessageActionHandler  extends AbstractActionHandler implements Action
      * @throws InvalidRequestPatternException
      * @throws NoRequestPatternFoundException
      */
-    public function handle(array $options = []): ?string
+    public function handle(array $options = []): ?ActionResponseInterface
     {
         $messageBody = $options('messageBody');
         if (!is_string($messageBody)) {
