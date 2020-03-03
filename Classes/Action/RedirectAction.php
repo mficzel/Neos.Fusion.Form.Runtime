@@ -1,21 +1,22 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\Action;
 
-use Neos\Flow\Http\Component\SetHeaderComponent;
-use Neos\Fusion\Form\Runtime\Domain\AbstractAction;
+use Neos\Flow\Mvc\ActionResponse;
 use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
-use Neos\Fusion\Form\Runtime\Domain\ActionResponse;
-use Neos\Fusion\Form\Runtime\Domain\ActionResponseInterface;
+use Neos\Flow\Http\Component\SetHeaderComponent;
 
-class RedirectAction extends AbstractAction implements ActionInterface
+class RedirectAction implements ActionInterface
 {
-    public function handle(array $options = []): ?ActionResponseInterface
+    public function handle(array $options = []): ?ActionResponse
     {
         $uri = $options['uri'];
         $status = $options['status'] ?? 303;
 
         if ($uri) {
-            return new ActionResponse(null, ['Status' => $status, 'Location' => $uri]);
+            $response = new ActionResponse();
+            $response->setComponentParameter(SetHeaderComponent::class, 'Location', $uri);
+            $response->setStatusCode($status);
+            return $response;
         }
 
         return null;

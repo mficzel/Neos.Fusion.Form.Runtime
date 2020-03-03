@@ -2,13 +2,14 @@
 namespace Neos\Fusion\Form\Runtime\Action;
 
 use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
-use Neos\Fusion\Form\Runtime\Domain\ActionResponse;
-use Neos\Fusion\Form\Runtime\Domain\ActionResponseInterface;
+use Neos\Flow\Mvc\ActionResponse;
 
 class MessageAction implements ActionInterface
 {
-    public function handle(array $options = []): ?ActionResponseInterface
+    public function handle(array $options = []): ?ActionResponse
     {
-        return new ActionResponse($options['message']);
+        $response = new ActionResponse();
+        $response->setContent($options['message']);
+        return $response;
     }
 }

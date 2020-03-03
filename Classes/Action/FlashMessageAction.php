@@ -6,15 +6,15 @@ use Neos\Error\Messages\Message;
 use Neos\Error\Messages\Notice;
 use Neos\Error\Messages\Warning;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\ActionResponse;
 use Neos\Flow\Mvc\Exception\InvalidFlashMessageConfigurationException;
 use Neos\Flow\Mvc\FlashMessage\FlashMessageService;
 use Neos\Flow\Security\Exception\InvalidRequestPatternException;
 use Neos\Flow\Security\Exception\NoRequestPatternFoundException;
 use Neos\Fusion\Form\Runtime\Domain\ActionHandlerException;
 use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
-use Neos\Fusion\Form\Runtime\Domain\ActionResponseInterface;
 
-class FlashMessageAction  implements ActionInterface
+class FlashMessageAction implements ActionInterface
 {
     /**
      * @Flow\Inject
@@ -29,7 +29,7 @@ class FlashMessageAction  implements ActionInterface
      * @throws InvalidRequestPatternException
      * @throws NoRequestPatternFoundException
      */
-    public function handle(array $options = []): ?ActionResponseInterface
+    public function handle(array $options = []): ?ActionResponse
     {
         $messageBody = $options('messageBody');
         if (!is_string($messageBody)) {

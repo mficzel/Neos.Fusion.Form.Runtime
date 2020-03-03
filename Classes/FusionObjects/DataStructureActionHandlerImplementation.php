@@ -2,13 +2,12 @@
 namespace Neos\Fusion\Form\Runtime\FusionObjects;
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Http\Component\SetHeaderComponent;
-use Neos\Flow\Mvc\Controller\ControllerContext;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
+use Neos\Flow\Mvc\ActionResponse;
 use Neos\Fusion\Form\Runtime\Domain\ActionResolver;
+use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
 use Neos\Fusion\FusionObjects\DataStructureImplementation;
 
-class DataStructureActionHandlerImplementation extends DataStructureImplementation implements ActionHandlerInterface
+class DataStructureActionHandlerImplementation extends DataStructureImplementation implements ActionInterface
 {
 
     /**
@@ -22,39 +21,30 @@ class DataStructureActionHandlerImplementation extends DataStructureImplementati
         return $this;
     }
 
-    public function handle(array $data = [], ControllerContext $controllerContext): ?string
+    public function handle(array $data = []): ?ActionResponse
     {
         $this->getRuntime()->pushContext('data', $data);
         $actionConfigurations = parent::evaluate();
         $this->getRuntime()->popContext();
 
-        $messages = [];
-        $headers = [];
+        $response = new ActionResponse();
         foreach ($actionConfigurations as $actionConfiguration) {
-            $action = $this->actionResolver->createAction($actionConfiguration['identifier']);
-            $response = $action->handle($actionConfiguration['options'] ?? []);
-            if ($response) {
-                if ($response->getText()) {
-                    $messages[] = $response->getText();
+            $subAction = $this->actionResolver->createAction($actionConfiguration['identifier']);
+            $subActionResponse = $subAction->handle($actionConfiguration['options'] ?? []);
+
+            if ($subActionResponse) {
+                // content of multiple responses is concatenated
+                if ($subActionResponse->getContent()) {
+                    $mergedContent = $response->getContent() . $subActionResponse->getContent();
+                    $subActionResponse->setContent($mergedContent);
                 }
-                if ($response->getHttpHeaders()) {
-                    $headers = array_merge($headers, $response->getHttpHeaders());
+                // preserve non 200 status codes that would be overwritten
+                if ($response->getStatusCode() !== 200 && $subActionResponse->getStatusCode() == 200) {
+                    $subActionResponse->setStatusCode($response->getStatusCode());
                 }
+                $subActionResponse->mergeIntoParentResponse($response);
             }
         }
-
-        if ($headers) {
-            foreach ($headers as $key => $value) {
-                $response = $controllerContext->getResponse();
-                $response->setComponentParameter(SetHeaderComponent::class, $key, $value);
-            }
-        }
-
-        if ($messages) {
-            return  implode('', $messages);
-        }
-
-        return null;
+        return $response;
     }
-
 }

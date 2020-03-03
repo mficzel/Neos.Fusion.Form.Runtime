@@ -7,7 +7,7 @@ prototype(Neos.Fusion.Form:MultiStepForm) {
 
     steps = Neos.Fusion.Form:MultiStepForm.StepCollection
 
-    actions = Neos.Fusion.Form:DataStructureActionHandler
+    action = Neos.Fusion.Form:DataStructureActionHandler
 
     renderer = afx`
         <Neos.Fusion.Form:Form

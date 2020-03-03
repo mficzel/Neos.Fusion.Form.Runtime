@@ -149,7 +149,7 @@ prototype(Form.Test:Content.ExampleForm) < prototype(Neos.Neos:ContentComponent)
         # The identifier can be a fully qualified classname or a PackageName:IdentifierName
         # that will be converted to a className
         #
-        actions = Neos.Fusion:DataStructure {
+        action {
         
             #
             # The message action accepts a single option `message` that is returned directly

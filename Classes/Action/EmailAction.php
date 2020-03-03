@@ -1,6 +1,7 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\Action;
 
+use Neos\Flow\Mvc\ActionResponse;
 use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Form\Exception\FinisherException;
 use Neos\Fusion\Form\Runtime\Domain\AbstractAction;
@@ -20,7 +21,7 @@ class EmailAction implements ActionInterface
      * @throws ActionHandlerException
      * @throws FinisherException
      */
-    public function handle(array $options = []): ?ActionResponseInterface
+    public function handle(array $options = []): ?ActionResponse
     {
         if (!class_exists(SwiftMailerMessage::class)) {
             throw new ActionHandlerException('The "neos/swiftmailer" doesn\'t seem to be installed, but is required for the EmailFinisher to work!', 1503392532);
@@ -89,18 +90,23 @@ class EmailAction implements ActionInterface
         $this->addAttachments($mail, $options);
 
         if ($testMode === true) {
-            \Neos\Flow\var_dump(
-                array(
-                    'sender' => array($senderAddress => $senderName),
-                    'recipients' => is_array($recipientAddress) ? $recipientAddress : array($recipientAddress => $recipientName),
-                    'replyToAddress' => $replyToAddress,
-                    'carbonCopyAddress' => $carbonCopyAddress,
-                    'blindCarbonCopyAddress' => $blindCarbonCopyAddress,
-                    'text' => $text,
-                    'html' => $html
-                ),
-                'E-Mail "' . $subject . '"'
+            $response = new ActionResponse();
+            $response->setContent(
+                \Neos\Flow\var_dump(
+                    array(
+                        'sender' => array($senderAddress => $senderName),
+                        'recipients' => is_array($recipientAddress) ? $recipientAddress : array($recipientAddress => $recipientName),
+                        'replyToAddress' => $replyToAddress,
+                        'carbonCopyAddress' => $carbonCopyAddress,
+                        'blindCarbonCopyAddress' => $blindCarbonCopyAddress,
+                        'text' => $text,
+                        'html' => $html
+                    ),
+                    'E-Mail "' . $subject . '"',
+                    true
+                )
             );
+            return $response;
         } else {
             $mail->send();
         }

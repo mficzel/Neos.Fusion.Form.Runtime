@@ -5,8 +5,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Utility\Algorithms;
 use Neos\Fusion\Form\Domain\Form;
 use Neos\Flow\Validation\ValidatorResolver;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerInterface;
-use Neos\Fusion\Form\Runtime\Domain\ActionResolver;
+use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
 use Neos\Fusion\Form\Runtime\Domain\FormState;
 use Neos\Fusion\Form\Runtime\Domain\SerializableUploadedFile;
 use Neos\Fusion\Form\Runtime\Domain\StepCollectionInterface;
@@ -45,12 +44,6 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     protected $validatorResolver;
 
     /**
-     * @var ActionResolver
-     * @Flow\Inject
-     */
-    protected $actionHandlerResolver;
-
-    /**
      * @var VariableFrontend
      * @Flow\Inject
      */
@@ -83,9 +76,9 @@ class MultiStepFormImplementation  extends AbstractFusionObject
     /**
      * @return array
      */
-    protected function getActionHandler(): ActionHandlerInterface
+    protected function getAction(): ActionInterface
     {
-        return  $this->fusionValue('actions');
+        return  $this->fusionValue('action');
     }
 
     /**
@@ -174,8 +167,20 @@ class MultiStepFormImplementation  extends AbstractFusionObject
             if ($nextStepIdentifier = $stepCollection->getNextStepIdentifier($stepIdentifier)) {
                 $stepIdentifier = $nextStepIdentifier;
             } else {
-                $actionHandler = $this->getActionHandler();
-                return $actionHandler->handle($formState->getCurrentData(), $this->getRuntime()->getControllerContext());
+                //
+                // the content of the action response is returned directly
+                // everything else is merged into the parent response
+                //
+                $action = $this->getAction();
+                $actionResponse = $action->handle($formState->getCurrentData());
+                if ($actionResponse) {
+                    $content = $actionResponse->getContent();
+                    $actionResponse->setContent('');
+                    $actionResponse->mergeIntoParentResponse($this->getRuntime()->getControllerContext()->getResponse());
+                    return $content;
+                } else {
+                    return '';
+                }
             }
         }
 
