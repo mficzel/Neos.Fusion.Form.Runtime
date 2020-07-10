@@ -1,8 +1,8 @@
 prototype(Neos.Fusion.Form:MultiStepForm) < prototype(Neos.Fusion.Form:RuntimeForm) {
 
-    identifier = null
-
-    process = Neos.Fusion.Form:Process.MultiStepProcess
+    process = Neos.Fusion.Form:Process.MultiStepProcess {
+        identifier = null
+    }
 
     action = Neos.Fusion.Form:Action.NestedConfigurationAction
 

@@ -1,8 +1,7 @@
 prototype(Neos.Fusion.Form:SingleStepForm) < prototype(Neos.Fusion.Form:RuntimeForm) {
 
-    identifier = null
-
     process = Neos.Fusion.Form:Process.SingleStepProcess {
+        identifier = null
         renderer = ''
         model = Neos.Fusion:DataStructure
     }

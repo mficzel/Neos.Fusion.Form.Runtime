@@ -1,6 +1,7 @@
 <?php
 namespace Neos\Fusion\Form\Runtime\FusionObjects\Process;
 
+use Neos\Error\Messages\Result;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Tests\Features\Bootstrap\SubProcess\SubProcess;
 use Neos\Fusion\Core\Parser;
@@ -34,14 +35,18 @@ class MultiStepProcessImplementation extends DataStructureImplementation impleme
      */
     protected $currentSubProcess;
 
+    /**
+     * @var array
+     */
+    protected $ignoreProperties = ['identifier'];
+
     public function evaluate()
     {
+        $this->identifier = $this->fusionValue('identifier');
+        if (!$this->identifier) {
+            $this->identifier = md5($this->path);
+        }
         return $this;
-    }
-
-    public function setIdentifier(string $identifier)
-    {
-        $this->identifier = $identifier;
     }
 
     public function getIdentifier(): string
@@ -49,7 +54,7 @@ class MultiStepProcessImplementation extends DataStructureImplementation impleme
         return $this->identifier;
     }
 
-    public function submitData(array $unvalidatedData = [])
+    public function handleSubmittedData(array $unvalidatedData = [])
     {
         if (!is_array($unvalidatedData)) {
             return;
@@ -60,7 +65,7 @@ class MultiStepProcessImplementation extends DataStructureImplementation impleme
         foreach ($unvalidatedData as $subProcessIdentifier => $unvalidatedSubProcessData) {
             $subProcess = $this->findSubProcessByIdentifier($subProcessIdentifier);
             if ($subProcess) {
-                $subProcess->submitData($unvalidatedSubProcessData);
+                $subProcess->handleSubmittedData($unvalidatedSubProcessData);
                 if ($subProcess->isCompleted()) {
                     $storeState[$subProcess->getIdentifier()] = $subProcess->getData();
                     $this->formStateRepository->setFormState($this->getIdentifier(), $storeState);
@@ -85,7 +90,28 @@ class MultiStepProcessImplementation extends DataStructureImplementation impleme
     public function getForm(): ?Form
     {
         if ($subProces = $this->getCurrentProcessStep()) {
-            return $subProces->getForm();
+            $subProcesForm = $subProces->getForm();
+            $subProcesForm->getFieldNamePrefix();
+
+            // use a fake request until we can pass the validation result and submitted values directly to the form
+            $request = clone $this->getRuntime()->getControllerContext()->getRequest();
+            $data = [$this->getIdentifier() => $subProcesForm->getData()];
+            if ($subProcesForm->getResult() && $subProcesForm->getResult()->hasErrors()) {
+                $result = (new Result())->forProperty($this->getIdentifier())->merge($subProcesForm->getResult());
+                $request->setArgument('__submittedArguments', $data);
+                $request->setArgument('__submittedArgumentValidationResults', $result);
+            }
+
+            // wrap in form nested in parent namespace
+            $form = new Form(
+                $subProcesForm->getRequest(),
+                $data,
+                $this->getIdentifier() . '[' . $subProces->getIdentifier() . ']',
+                null,
+                'post',
+                'multipart/form-data'
+            );
+            return $form;
         }
         return null;
 
@@ -162,27 +188,27 @@ class MultiStepProcessImplementation extends DataStructureImplementation impleme
 
         // instantiate subprocesses
         $this->subProcessses = [];
-        foreach ($sortedChildFusionKeys as $subProcessIdentifier) {
-            $propertyPath = $subProcessIdentifier;
-            if ($this->isUntypedProperty($this->properties[$subProcessIdentifier])) {
+        foreach ($sortedChildFusionKeys as $childName) {
+            $propertyPath = $childName;
+            if ($this->isUntypedProperty($this->properties[$childName])) {
                 $propertyPath .= '<Neos.Fusion.Form:Process.MultiStepSubProcess>';
             }
             try {
                 $subProcess = $this->fusionValue($propertyPath);
             } catch (\Exception $e) {
-                $subProcess = $this->runtime->handleRenderingException($this->path . '/' . $subProcessIdentifier, $e);
+                $subProcess = $this->runtime->handleRenderingException($this->path . '/' . $childName, $e);
             }
             if ($subProcess === null && $this->runtime->getLastEvaluationStatus() === Runtime::EVALUATION_SKIPPED) {
                 continue;
             }
 
             if ($subProcess instanceof  SubProcessInterface) {
-                $subProcess->setIdentifier($this->identifier . '[' . $subProcessIdentifier . ']');
-                $storedSubState = $storedState[$subProcess->getIdentifier()] ?? null;
+                $namespace = $subProcess->getIdentifier();
+                $storedSubState = $storedState[$namespace] ?? null;
                 if ($storedSubState) {
                     $subProcess->restoreData($storedSubState);
                 }
-                $this->subProcessses[$subProcessIdentifier] = $subProcess;
+                $this->subProcessses[$namespace] = $subProcess;
             }
         }
 

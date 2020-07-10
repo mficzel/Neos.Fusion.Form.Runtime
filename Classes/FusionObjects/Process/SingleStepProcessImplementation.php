@@ -54,12 +54,11 @@ class SingleStepProcessImplementation extends AbstractFusionObject implements Pr
 
     public function evaluate()
     {
+        $this->identifier = $this->fusionValue('identifier');
+        if (!$this->identifier) {
+            $this->identifier  = md5($this->path);
+        }
         return $this;
-    }
-
-    public function setIdentifier(string $identifier)
-    {
-        $this->identifier = $identifier;
     }
 
     public function getIdentifier(): string
@@ -67,7 +66,7 @@ class SingleStepProcessImplementation extends AbstractFusionObject implements Pr
         return $this->identifier;
     }
 
-    public function submitData(array $unvalidatedData = [])
+    public function handleSubmittedData(array $unvalidatedData = [])
     {
         $model = $this->fusionValue('model');
 

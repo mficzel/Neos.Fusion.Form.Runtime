@@ -37,7 +37,6 @@ class RuntimeFormImplementation  extends AbstractFusionObject
      */
     public function evaluate(): string
     {
-        $identifier = $this->getIdentifier();
         $process = $this->getProcess();
 
         //
@@ -45,10 +44,10 @@ class RuntimeFormImplementation  extends AbstractFusionObject
         // until and call the renderForm method
         // until the process is finished
         //
-        $process->setIdentifier($identifier);
-        $unvalidatedData = $this->getSubmittedData($identifier);
+        $namespace = $process->getIdentifier();
+        $unvalidatedData = $this->getSubmittedDataForNamespace($namespace);
         if ($unvalidatedData) {
-            $process->submitData($unvalidatedData);
+            $process->handleSubmittedData($unvalidatedData);
         }
         if (!$process->isCompleted()) {
             $this->getRuntime()->pushContextArray([
@@ -79,14 +78,14 @@ class RuntimeFormImplementation  extends AbstractFusionObject
     }
 
     /**
-     * @param string $formIdentifier
+     * @param string $namespace
      * @return array
      */
-    protected function getSubmittedData(string $formIdentifier): array
+    protected function getSubmittedDataForNamespace(string $namespace): array
     {
         $request = $this->getRuntime()->getControllerContext()->getRequest();
-        if ($request->hasArgument($formIdentifier)) {
-            $submittedValues = $request->getArgument($formIdentifier);
+        if ($request->hasArgument($namespace)) {
+            $submittedValues = $request->getArgument($namespace);
             if (is_array($submittedValues)) {
                 $submittedValues = array_map(
                     function($item) {

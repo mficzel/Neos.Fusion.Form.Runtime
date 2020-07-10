@@ -1,4 +1,4 @@
-prototype(Neos.Fusion.Form:RuntimeForm) {
+    prototype(Neos.Fusion.Form:RuntimeForm) {
     @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\RuntimeFormImplementation'
 
     renderer = afx`

@@ -4,6 +4,4 @@ prototype(Neos.Fusion.Form:Process.SingleStepProcess) {
     renderer = ''
 
     model = Neos.Fusion:DataStructure
-
-
 }
