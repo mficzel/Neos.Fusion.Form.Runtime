@@ -1,0 +1,12 @@
+prototype(Neos.Fusion.Form:SingleStepForm) < prototype(Neos.Fusion.Form:RuntimeForm) {
+
+    identifier = null
+
+    process = Neos.Fusion.Form:Process.SingleStepProcess {
+        renderer = ''
+        model = Neos.Fusion:DataStructure
+    }
+
+    action = Neos.Fusion.Form:Action.NestedConfigurationAction
+
+}

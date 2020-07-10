@@ -1,6 +1,0 @@
-prototype(Neos.Fusion.Form:MultiStepForm.Step) {
-    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Form\\StepImplementation'
-    renderer = ''
-    validators = Neos.Fusion:DataStructure
-    types = Neos.Fusion:DataStructure
-}

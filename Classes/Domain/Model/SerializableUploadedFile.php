@@ -1,5 +1,5 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\Domain;
+namespace Neos\Fusion\Form\Runtime\Domain\Model;
 
 use GuzzleHttp\Psr7;
 use Psr\Http\Message\UploadedFileInterface;

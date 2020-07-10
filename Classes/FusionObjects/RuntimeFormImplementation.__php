@@ -17,7 +17,7 @@ use Neos\Flow\Property\PropertyMappingConfiguration;
 use Neos\Cache\Frontend\VariableFrontend;
 use Psr\Http\Message\UploadedFileInterface;
 
-class MultiStepFormImplementation  extends AbstractFusionObject
+class RuntimeFormImplementation  extends AbstractFusionObject
 {
     /**
      * @var PropertyMapper

@@ -5,7 +5,7 @@ use Neos\Flow\Mvc\ActionResponse;
 use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Form\Exception\FinisherException;
 use Neos\Fusion\Form\Runtime\Domain\AbstractAction;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerException;
+use Neos\Fusion\Form\Runtime\Domain\Exception\ActionException;
 use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
 use Neos\Fusion\Form\Runtime\Domain\ActionResponseInterface;
 use Neos\SwiftMailer\Message as SwiftMailerMessage;
@@ -18,13 +18,13 @@ class EmailAction implements ActionInterface
     /**
      * @param array $options
      * @return string|null
-     * @throws ActionHandlerException
+     * @throws ActionException
      * @throws FinisherException
      */
     public function handle(array $options = []): ?ActionResponse
     {
         if (!class_exists(SwiftMailerMessage::class)) {
-            throw new ActionHandlerException('The "neos/swiftmailer" doesn\'t seem to be installed, but is required for the EmailFinisher to work!', 1503392532);
+            throw new ActionException('The "neos/swiftmailer" doesn\'t seem to be installed, but is required for the EmailFinisher to work!', 1503392532);
         }
 
         $subject = $options['subject'] ?? null;
@@ -42,16 +42,16 @@ class EmailAction implements ActionInterface
         $testMode = $options['testMode'] ?? false;
 
         if ($subject === null) {
-            throw new ActionHandlerException('The option "subject" must be set for the EmailFinisher.', 1327060320);
+            throw new ActionException('The option "subject" must be set for the EmailFinisher.', 1327060320);
         }
         if ($recipientAddress === null) {
-            throw new ActionHandlerException('The option "recipientAddress" must be set for the EmailFinisher.', 1327060200);
+            throw new ActionException('The option "recipientAddress" must be set for the EmailFinisher.', 1327060200);
         }
         if (is_array($recipientAddress) && !empty($recipientName)) {
-            throw new ActionHandlerException('The option "recipientName" cannot be used with multiple recipients in the EmailFinisher.', 1483365977);
+            throw new ActionException('The option "recipientName" cannot be used with multiple recipients in the EmailFinisher.', 1483365977);
         }
         if ($senderAddress === null) {
-            throw new ActionHandlerException('The option "senderAddress" must be set for the EmailFinisher.', 1327060210);
+            throw new ActionException('The option "senderAddress" must be set for the EmailFinisher.', 1327060210);
         }
 
         $mail = new SwiftMailerMessage();

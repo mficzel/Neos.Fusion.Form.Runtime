@@ -1,13 +1,13 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\FusionObjects;
+namespace Neos\Fusion\Form\Runtime\FusionObjects\Action;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\ActionResponse;
-use Neos\Fusion\Form\Runtime\Domain\ActionResolver;
+use Neos\Fusion\Form\Runtime\Domain\Service\ActionResolver;
 use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
 use Neos\Fusion\FusionObjects\DataStructureImplementation;
 
-class DataStructureActionHandlerImplementation extends DataStructureImplementation implements ActionInterface
+class NestedConfigurationActionImplementation extends DataStructureImplementation implements ActionInterface
 {
 
     /**
@@ -38,7 +38,7 @@ class DataStructureActionHandlerImplementation extends DataStructureImplementati
                     $mergedContent = $response->getContent() . $subActionResponse->getContent();
                     $subActionResponse->setContent($mergedContent);
                 }
-                // preserve non 200 status codes that would be overwritten
+                // preserve non 200 status codes that would otherwise be overwritten
                 if ($response->getStatusCode() !== 200 && $subActionResponse->getStatusCode() == 200) {
                     $subActionResponse->setStatusCode($response->getStatusCode());
                 }

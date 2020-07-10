@@ -11,7 +11,7 @@ use Neos\Flow\Mvc\Exception\InvalidFlashMessageConfigurationException;
 use Neos\Flow\Mvc\FlashMessage\FlashMessageService;
 use Neos\Flow\Security\Exception\InvalidRequestPatternException;
 use Neos\Flow\Security\Exception\NoRequestPatternFoundException;
-use Neos\Fusion\Form\Runtime\Domain\ActionHandlerException;
+use Neos\Fusion\Form\Runtime\Domain\Exception\ActionException;
 use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
 
 class FlashMessageAction implements ActionInterface
@@ -33,7 +33,7 @@ class FlashMessageAction implements ActionInterface
     {
         $messageBody = $options('messageBody');
         if (!is_string($messageBody)) {
-            throw new ActionHandlerException(sprintf('The message body must be of type string, "%s" given.', gettype($messageBody)), 1335980069);
+            throw new ActionException(sprintf('The message body must be of type string, "%s" given.', gettype($messageBody)), 1335980069);
         }
         $messageTitle = $options('messageTitle');
         $messageArguments = $options('messageArguments');

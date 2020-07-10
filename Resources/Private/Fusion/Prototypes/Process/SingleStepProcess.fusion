@@ -1,0 +1,9 @@
+prototype(Neos.Fusion.Form:Process.SingleStepProcess) {
+    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Process\\SingleStepProcessImplementation'
+
+    renderer = ''
+
+    model = Neos.Fusion:DataStructure
+
+
+}

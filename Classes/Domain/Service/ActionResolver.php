@@ -1,9 +1,11 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\Domain;
+namespace Neos\Fusion\Form\Runtime\Domain\Service;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
+use Neos\Fusion\Form\Runtime\Domain\ActionInterface;
+use Neos\Fusion\Form\Runtime\Domain\Exception\NoSuchActionException;
 
 class ActionResolver
 {
@@ -18,18 +20,18 @@ class ActionResolver
      * @param string $handlerType
      * @param ControllerContext $controllerContext
      * @return ActionInterface
-     * @throws NoSuchActionHandlerException
+     * @throws NoSuchActionException
      */
     public function createAction(string $handlerType): ActionInterface
     {
         if ($objectName = $this->resolveActionObjectName($handlerType)) {
             $actionHandler = new $objectName();
         } else {
-            throw new NoSuchActionHandlerException('The action handler "' . $handlerType . '" was could not be resolved!', 1581362538);
+            throw new NoSuchActionException('The action handler "' . $handlerType . '" was could not be resolved!', 1581362538);
         }
 
         if (!($actionHandler instanceof ActionInterface)) {
-            throw new NoSuchActionHandlerException(sprintf('The action handler "%s" does not implement %s!', $handlerType, ActionInterface::class), 1581362552);
+            throw new NoSuchActionException(sprintf('The action handler "%s" does not implement %s!', $handlerType, ActionInterface::class), 1581362552);
         }
 
         return $actionHandler;

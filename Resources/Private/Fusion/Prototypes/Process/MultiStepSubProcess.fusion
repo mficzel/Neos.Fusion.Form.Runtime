@@ -1,0 +1,13 @@
+prototype(Neos.Fusion.Form:Process.MultiStepSubProcess) {
+    @class = 'Neos\\Fusion\\Form\\Runtime\\FusionObjects\\Process\\MultiStepSubProcessImplementation'
+
+    # a required step has to be submitted before the process is considered finished
+    required = true
+
+    # an accessible step can be rendered and submitted
+    accessible = true
+
+    renderer = ''
+
+    model = Neos.Fusion:DataStructure
+}

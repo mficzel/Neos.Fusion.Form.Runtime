@@ -1,7 +1,9 @@
 <?php
-namespace Neos\Fusion\Form\Runtime\Domain;
+namespace Neos\Fusion\Form\Runtime\Domain\Model;
+
 
 use Neos\Utility\Arrays;
+
 
 class FormState
 {
